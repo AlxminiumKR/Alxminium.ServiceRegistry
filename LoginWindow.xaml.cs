@@ -38,10 +38,9 @@ namespace Alxminium.ServiceRegistry
 
             if (user != null)
             {
-                // Если залогинились — открываем главное окно и передаем туда юзера
                 MainWindow main = new MainWindow(user);
                 main.Show();
-                this.Close(); // Закрываем окно логина
+                this.Close();
             }
             else
             {
