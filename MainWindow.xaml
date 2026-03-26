@@ -11,10 +11,13 @@
 
                     <TextBlock Text="Выберите объект:"/>
                     <ComboBox x:Name="ComboObjects" DisplayMemberPath="Name" Margin="0,5,0,15"/>
+
                     <TextBlock Text="Выберите услугу:"/>
                     <ComboBox x:Name="ComboServices" DisplayMemberPath="WorkName" Margin="0,5,0,15"/>
+
                     <TextBlock Text="Объем работ (кол-во):"/>
                     <TextBox x:Name="TxtVolume" Margin="0,5,0,20"/>
+
                     <Button Content="Создать заявку" Height="40" Background="#2196F3" Foreground="White" Click="BtnCreateRequest_Click"/>
                 </StackPanel>
             </TabItem>
@@ -48,7 +51,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Администрирование">
+            <TabItem x:Name="TabAdmin" Header="Администрирование">
                 <UniformGrid Columns="2" Margin="10">
                     <GroupBox Header="Реестр объектов">
                         <DockPanel>

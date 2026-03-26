@@ -13,6 +13,7 @@ namespace Alxminium.ServiceRegistry.Models
         public string WorkName { get; set; }
         public string WorkType { get; set; }
         public int DeadlineDays { get; set; }
+        public int UserId { get; set; }
 
         public double Volume { get; set; }
         public string Status { get; set; }

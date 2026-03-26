@@ -1,18 +1,23 @@
 ﻿using Alxminium.ServiceRegistry.Models;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Win32;
 using System;
 using System.Linq;
 using System.Windows;
-using ClosedXML.Excel;
-using Microsoft.Win32;
 
 namespace Alxminium.ServiceRegistry
 {
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public User CurrentUser { get; set; }
+        public MainWindow(User user)
         {
             InitializeComponent();
+            CurrentUser = user;
+            ApplyPermissions();
+
             LoadReferenceData();
             LoadRequestsFromDb();
 
@@ -20,7 +25,18 @@ namespace Alxminium.ServiceRegistry
 
             ComboObjects.ItemsSource = DataStorage.Objects;
             ComboServices.ItemsSource = DataStorage.ServiceTasks;
+            this.Title += $" - Вы вошли как: {CurrentUser.Login} ({CurrentUser.Role})";
             //GridRequests.ItemsSource = DataStorage.Requests;
+        }
+        private void ApplyPermissions()
+        {
+            if (CurrentUser.Role != "Admin")
+            {
+                if (TabAdmin != null)
+                {
+                    TabAdmin.Visibility = Visibility.Collapsed;
+                }
+            }
         }
         private void LoadRequestsFromDb()
         {
