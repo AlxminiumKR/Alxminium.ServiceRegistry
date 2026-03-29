@@ -32,10 +32,12 @@
                          Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" 
                          FontSize="16" Margin="0,0,0,30"/>
 
-            <Button x:Name="BtnLogin" Content="ВОЙТИ В СИСТЕМУ" 
+            <Button x:Name="BtnLogin" 
+                    Content="ВОЙТИ В СИСТЕМУ" 
                     Click="BtnLogin_Click" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" 
-                    Height="50" materialDesign:ButtonAssist.CornerRadius="25"/>
+                    IsDefault="True"  Style="{StaticResource MaterialDesignRaisedButton}" 
+                    Height="50" 
+                    materialDesign:ButtonAssist.CornerRadius="25"/>
         </StackPanel>
     </Grid>
 </Window>

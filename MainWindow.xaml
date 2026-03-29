@@ -57,7 +57,16 @@
                                           DisplayMemberPath="WorkName" Margin="0,0,0,20"/>
 
                                 <TextBox x:Name="TxtVolume" materialDesign:HintAssist.Hint="Объем работ (количество)" 
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,32"/>
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
+
+                                <TextBox x:Name="TxtDescription" 
+                                         materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True" 
+                                         VerticalScrollBarVisibility="Auto" 
+                                         MinHeight="80" 
+                                         Margin="0,0,0,32" Height="17"/>
 
                                 <Button Content="СОЗДАТЬ ЗАЯВКУ" Click="BtnCreateRequest_Click" 
                                         Height="50" materialDesign:ButtonAssist.CornerRadius="25"
@@ -103,11 +112,19 @@
                                       CanUserAddRows="False" SelectionMode="Single"
                                       Style="{StaticResource MaterialDesignDataGrid}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="120"/>
-                                    <DataGridTextColumn Header="Объект обслуживания" Binding="{Binding ObjectName}" Width="*"/>
-                                    <DataGridTextColumn Header="Наименование услуги" Binding="{Binding WorkName}" Width="*"/>
-                                    <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="100"/>
-                                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="120">
+                                    <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
+                                    <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150"/>
+                                    <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="150"/>
+                                    <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="150"/>
+                                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="110">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="FontWeight" Value="SemiBold"/>

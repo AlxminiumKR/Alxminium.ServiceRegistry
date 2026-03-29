@@ -65,13 +65,12 @@ namespace Alxminium.ServiceRegistry
                                 Author = reader.GetString("author"),
                                 Section = reader.GetString("section"),
                                 ObjectId = reader.GetInt32("object_id"),
-
                                 ObjectName = reader.GetString("object_display_name"),
-
                                 WorkName = reader.GetString("frozen_name"),
                                 WorkType = reader.GetString("frozen_type"),
                                 DeadlineDays = reader.GetInt32("frozen_deadline"),
                                 Volume = reader.GetDouble("volume"),
+                                Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
                                 Status = reader.GetString("status"),
                                 CreatedAt = reader.GetDateTime("created_at")
                             });
@@ -166,9 +165,9 @@ namespace Alxminium.ServiceRegistry
                 {
                     conn.Open();
                     string sql = @"INSERT INTO requests 
-                (author, section, object_id, frozen_name, frozen_type, frozen_deadline, volume, status) 
-                VALUES (@author, @section, @objId, @name, @type, @deadline, @vol, @status);
-                SELECT LAST_INSERT_ID();";
+                    (author, section, object_id, frozen_name, frozen_type, frozen_deadline, volume, description, status) 
+                    VALUES (@author, @section, @objId, @name, @type, @deadline, @vol, @desc, @status);
+                    SELECT LAST_INSERT_ID();";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
                     {
@@ -179,6 +178,7 @@ namespace Alxminium.ServiceRegistry
                         cmd.Parameters.AddWithValue("@type", req.WorkType);
                         cmd.Parameters.AddWithValue("@deadline", req.DeadlineDays);
                         cmd.Parameters.AddWithValue("@vol", req.Volume);
+                        cmd.Parameters.AddWithValue("@desc", req.Description ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@status", req.Status);
 
                         var newId = cmd.ExecuteScalar();
@@ -399,15 +399,16 @@ namespace Alxminium.ServiceRegistry
             var selectedObject = ComboObjects.SelectedItem as ServiceObject;
             var selectedTask = ComboServices.SelectedItem as ServiceTask;
 
-            if (selectedObject == null || selectedTask == null || string.IsNullOrEmpty(TxtVolume.Text))
+            // Добавил проверку TxtDescription.Text, если описание обязательно
+            if (selectedObject == null || selectedTask == null ||
+                string.IsNullOrEmpty(TxtVolume.Text) || string.IsNullOrEmpty(TxtDescription.Text))
             {
-                MessageBox.Show("Заполните все поля!");
+                MessageBox.Show("Заполните все поля, включая описание!");
                 return;
             }
 
             var newRequest = new WorkRequest
             {
-
                 Id = 0,
                 Author = "alxminium_user",
                 Section = "Участок №1",
@@ -418,6 +419,8 @@ namespace Alxminium.ServiceRegistry
                 WorkType = selectedTask.WorkType,
                 DeadlineDays = selectedTask.DeadlineDays,
 
+                Description = TxtDescription.Text,
+
                 Volume = double.TryParse(TxtVolume.Text, out var vol) ? vol : 0,
                 Status = "В очереди",
                 CreatedAt = DateTime.Now
@@ -426,10 +429,13 @@ namespace Alxminium.ServiceRegistry
             try
             {
                 DataStorage.Requests.Add(newRequest);
-
                 SaveRequestToDb(newRequest);
 
                 MessageBox.Show("Заявка успешно создана и данные законсервированы в MySQL!");
+                TxtVolume.Clear();
+                TxtDescription.Clear();
+                ComboObjects.SelectedIndex = -1;
+                ComboServices.SelectedIndex = -1;
 
                 RefreshRequestsGrid();
             }

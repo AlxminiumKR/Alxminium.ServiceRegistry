@@ -17,6 +17,7 @@ namespace Alxminium.ServiceRegistry.Models
 
         public double Volume { get; set; }
         public string Status { get; set; }
+        public string Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
