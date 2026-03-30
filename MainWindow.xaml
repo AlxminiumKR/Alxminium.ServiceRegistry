@@ -25,15 +25,11 @@
                         <materialDesign:PackIcon Kind="ChartBar" VerticalAlignment="Center" Foreground="#757575"/>
                         <TextBlock Text="Всего заявок: " Margin="8,0,0,0" FontWeight="SemiBold"/>
                         <TextBlock x:Name="TxtTotalCount" Text="0"/>
-
                         <Separator Margin="16,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
-
                         <materialDesign:PackIcon Kind="ClockOutline" VerticalAlignment="Center" Foreground="#FFA000"/>
                         <TextBlock Text=" В работе: " Margin="4,0,0,0" FontWeight="SemiBold"/>
                         <TextBlock x:Name="TxtPendingCount" Text="0"/>
-
                         <Separator Margin="16,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
-
                         <materialDesign:PackIcon Kind="CheckCircleOutline" VerticalAlignment="Center" Foreground="Green"/>
                         <TextBlock Text=" Выполнено: " Margin="4,0,0,0" FontWeight="SemiBold"/>
                         <TextBlock x:Name="TxtCompletedCount" Text="0"/>
@@ -41,56 +37,37 @@
                 </StatusBarItem>
             </StatusBar>
 
-            <TabControl materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+            <TabControl x:Name="MainTabControl" 
+                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                         Style="{StaticResource MaterialDesignNavigationRailTabControl}">
 
                 <TabItem>
                     <TabItem.Header>
-                        <Grid HorizontalAlignment="Center" MaxWidth="80">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="PlusCircle" 
-                                     HorizontalAlignment="Center" 
-                                     Width="24" Height="24"
-                                     Foreground="White"/>
-                                <TextBlock Text="РЕГИСТРАЦИЯ" 
-                                           TextWrapping="Wrap" 
-                                           TextAlignment="Center" 
-                                           FontSize="10" 
-                                           FontFamily="{materialDesign:MaterialDesignFont}" 
-                                           Foreground="White" 
-                                           LineHeight="12" 
-                                           LineStackingStrategy="BlockLineHeight"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Width="80">
+                            <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
+                            <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                        </StackPanel>
                     </TabItem.Header>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <materialDesign:Card Margin="40" Padding="32" MaxWidth="500" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                                             UniformCornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp3">
+                                           UniformCornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp3">
                             <StackPanel>
                                 <TextBlock Text="Новая заявка" Style="{StaticResource MaterialDesignHeadline5TextBlock}" Margin="0,0,0,24"/>
-
                                 <ComboBox x:Name="ComboObjects" materialDesign:HintAssist.Hint="Выберите объект обслуживания" 
                                           Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
                                           DisplayMemberPath="Name" Margin="0,0,0,20"/>
-
                                 <ComboBox x:Name="ComboServices" materialDesign:HintAssist.Hint="Тип работы / Услуга" 
                                           Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
                                           DisplayMemberPath="WorkName" Margin="0,0,0,20"/>
-
                                 <TextBox x:Name="TxtVolume" materialDesign:HintAssist.Hint="Объем работ (количество)" 
-                                          Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
-
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
                                 <TextBox x:Name="TxtDescription" 
-                                          materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
-                                          Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                                          TextWrapping="Wrap" 
-                                          AcceptsReturn="True" 
-                                          VerticalScrollBarVisibility="Auto" 
-                                          MinHeight="80" 
-                                          Margin="0,0,0,32" Height="17"/>
-
-                                <Button Content="СОЗДАТЬ ЗАЯВКУ" Click="BtnCreateRequest_Click" 
+                                         materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                         TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                                         MinHeight="80" Margin="0,0,0,32"/>
+                                <Button x:Name="BtnCreateRequest" Content="СОЗДАТЬ ЗАЯВКУ" Click="BtnCreateRequest_Click" 
                                         Height="50" materialDesign:ButtonAssist.CornerRadius="25"
                                         Style="{StaticResource MaterialDesignRaisedButton}"/>
                             </StackPanel>
@@ -98,11 +75,11 @@
                     </ScrollViewer>
                 </TabItem>
 
-                <TabItem>
+                <TabItem x:Name="TabArchive">
                     <TabItem.Header>
-                        <StackPanel>
+                        <StackPanel Width="80">
                             <materialDesign:PackIcon Kind="FileTable" HorizontalAlignment="Center" Width="24" Height="24"/>
-                            <TextBlock Text="АРХИВ"/>
+                            <TextBlock Text="АРХИВ" FontSize="10" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
 
@@ -116,54 +93,54 @@
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox x:Name="ChkShowCompleted" Checked="Filter_Changed" Unchecked="Filter_Changed" 
                                           Content="Показать выполненные" VerticalAlignment="Center" Margin="0,0,24,0"/>
-
                                 <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Bottom" Margin="0,0,4,8" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                                 <TextBox x:Name="TxtSearch" materialDesign:HintAssist.Hint="Поиск по объекту или услуге" 
                                          Width="220" Margin="0,0,24,0" 
                                          TextChanged="TxtSearch_TextChanged"
                                          Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
-
                                 <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="Дата С" Width="100" Margin="0,0,8,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
                                 <TextBlock Text="—" VerticalAlignment="Bottom" Margin="0,0,8,8"/>
                                 <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="Дата ПО" Width="100" Margin="0,0,24,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
-
-                                <Button Content="ЭКСПОРТ EXCEL" Click="BtnExport_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
-                                <Button x:Name="BtnDeleteRequest" Content="УДАЛИТЬ" Click="BtnDeleteRequest_Click" 
-                                        Background="#E53935" BorderBrush="#E53935" Foreground="White" 
-                                        Style="{StaticResource MaterialDesignRaisedButton}"/>
+                                <Button Click="BtnExport_Click" 
+                                        Style="{StaticResource MaterialDesignFlatButton}" 
+                                        Foreground="#2E7D32"
+                                        Padding="8,4"
+                                        ToolTip="Выгрузить текущий список в Excel">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="FileExcel" Width="20" Height="20" VerticalAlignment="Center"/>
+                                        <TextBlock Text="ЭКСПОРТ EXCEL" Margin="8,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </materialDesign:Card>
 
-                        <materialDesign:Card Grid.Row="1" materialDesign:ElevationAssist.Elevation="Dp2" VerticalAlignment="Stretch">
+                        <materialDesign:Card Grid.Row="1" materialDesign:ElevationAssist.Elevation="Dp2">
                             <DataGrid x:Name="GridRequests" MouseDoubleClick="GridRequests_MouseDoubleClick" 
                                       AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}" 
                                       CanUserAddRows="False" SelectionMode="Single"
                                       Style="{StaticResource MaterialDesignDataGrid}">
+                                <DataGrid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Редактировать" Click="MenuEditRequest_Click">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="Pencil" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator />
+                                        <MenuItem Header="Удалить заявку" Click="BtnDeleteRequest_Click" Foreground="#E53935">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="Delete" Foreground="#E53935" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
                                     <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150"/>
                                     <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="150"/>
                                     <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="100"/>
-                                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="TextWrapping" Value="NoWrap"/>
-                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="110">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Выполнена">
-                                                        <Setter Property="Foreground" Value="Green"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="110"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </materialDesign:Card>
@@ -172,26 +149,24 @@
 
                 <TabItem x:Name="TabAdmin">
                     <TabItem.Header>
-                        <StackPanel>
+                        <StackPanel Width="80">
                             <materialDesign:PackIcon Kind="Settings" HorizontalAlignment="Center" Width="24" Height="24"/>
-                            <TextBlock Text="АДМИН"/>
+                            <TextBlock Text="АДМИН" FontSize="10" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
-
                     <UniformGrid Columns="2" Margin="10">
                         <materialDesign:Card Margin="10" Padding="15">
                             <DockPanel>
                                 <TextBlock Text="РЕЕСТР ОБЪЕКТОВ" DockPanel.Dock="Top" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,10"/>
                                 <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportObjects_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
-                                <DataGrid x:Name="GridAllObjects" materialDesign:DataGridAssist.CellPadding="8" materialDesign:DataGridAssist.ColumnHeaderPadding="8"/>
+                                <DataGrid x:Name="GridAllObjects"/>
                             </DockPanel>
                         </materialDesign:Card>
-
                         <materialDesign:Card Margin="10" Padding="15">
                             <DockPanel>
                                 <TextBlock Text="СПИСОК УСЛУГ" DockPanel.Dock="Top" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,10"/>
                                 <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportServices_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
-                                <DataGrid x:Name="GridAllServices" materialDesign:DataGridAssist.CellPadding="8" materialDesign:DataGridAssist.ColumnHeaderPadding="8"/>
+                                <DataGrid x:Name="GridAllServices"/>
                             </DockPanel>
                         </materialDesign:Card>
                     </UniformGrid>

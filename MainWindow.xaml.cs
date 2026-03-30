@@ -86,6 +86,44 @@ namespace Alxminium.ServiceRegistry
                 MessageBox.Show("Ошибка при загрузке с JOIN: " + ex.Message);
             }
         }
+
+        private void UpdateRequestDetailsInDb(WorkRequest req)
+        {
+            var db = new DatabaseManager();
+            try
+            {
+                using (var conn = db.GetConnection())
+                {
+                    conn.Open();
+                    string sql = "UPDATE requests SET volume = @vol, description = @desc WHERE id = @id";
+
+                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@vol", req.Volume);
+                        cmd.Parameters.AddWithValue("@desc", req.Description ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@id", req.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка обновления данных в БД: " + ex.Message);
+            }
+        }
+
+        private void MenuEditRequest_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridRequests.SelectedItem is WorkRequest selectedRequest)
+            {
+                TxtVolume.Text = selectedRequest.Volume.ToString();
+                TxtDescription.Text = selectedRequest.Description;
+
+                BtnCreateRequest.Content = "Сохранить изменения";
+                BtnCreateRequest.Tag = selectedRequest;
+                MainTabControl.SelectedIndex = 0;
+            }
+        }
         private void DeleteRequestFromDb(int requestId)
         {
             var db = new DatabaseManager();
@@ -489,11 +527,27 @@ namespace Alxminium.ServiceRegistry
         {
             if (GridRequests.SelectedItem is WorkRequest selectedRequest)
             {
-                selectedRequest.Status = "Выполнена";
+                if (selectedRequest.Status == "Выполнена")
+                {
+                    if (CurrentUser.Role != "Admin")
+                    {
+                        MessageBox.Show("У вас недостаточно прав для возврата заявки в работу. Обратитесь к администратору.",
+                                        "Доступ ограничен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    selectedRequest.Status = "В работе";
+                    MessageBox.Show($"Заявка №{selectedRequest.Id} возвращена в работу! - alxminium");
+                }
+                else
+                {
+                    selectedRequest.Status = "Выполнена";
+                    MessageBox.Show($"Заявка №{selectedRequest.Id} завершена! - alxminium");
+                }
+
                 UpdateRequestStatusInDb(selectedRequest);
                 UpdateStatistics();
                 RefreshRequestsGrid();
-                MessageBox.Show($"Заявка №{selectedRequest.Id} завершена! - alxminium");
             }
         }
         private void BtnExport_Click(object sender, RoutedEventArgs e)
@@ -547,12 +601,29 @@ namespace Alxminium.ServiceRegistry
             var selectedObject = ComboObjects.SelectedItem as ServiceObject;
             var selectedTask = ComboServices.SelectedItem as ServiceTask;
 
+            if (BtnCreateRequest.Tag is WorkRequest editingReq)
+            {
+                editingReq.Volume = double.TryParse(TxtVolume.Text, out var v) ? v : 0;
+                editingReq.Description = TxtDescription.Text;
+
+                UpdateRequestDetailsInDb(editingReq);
+
+                // Сбрасываем кнопку обратно
+                BtnCreateRequest.Content = "Создать заявку";
+                BtnCreateRequest.Tag = null;
+
+                RefreshRequestsGrid();
+                MessageBox.Show("Заявка обновлена!");
+                return;
+            }
+
             if (selectedObject == null || selectedTask == null ||
                 string.IsNullOrEmpty(TxtVolume.Text) || string.IsNullOrEmpty(TxtDescription.Text))
             {
                 MessageBox.Show("Заполните все поля, включая описание!");
                 return;
             }
+
 
             var newRequest = new WorkRequest
             {
