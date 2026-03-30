@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Win32;
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Windows;
 
 namespace Alxminium.ServiceRegistry
@@ -86,6 +87,39 @@ namespace Alxminium.ServiceRegistry
                 MessageBox.Show("Ошибка при загрузке с JOIN: " + ex.Message);
             }
         }
+
+        private async void BtnSendFeedback_Click(object sender, RoutedEventArgs e)
+        {
+            string message = TxtFeedbackMessage.Text;
+            if (string.IsNullOrWhiteSpace(message)) return;
+            string token = "8534495451:AAGLfgpQfVQer4nH575g3B2Pj4E0OMR_xIE";
+            string chatId = "915235460";
+            string user = System.Environment.UserName;
+
+            string text = $"🚀 *Новый фидбек!*\n👤 *От:* {user}\n📝 *Сообщение:* {message}";
+            string url = $"https://api.telegram.org/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
+
+            try
+            {
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    var response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        FeedbackDialog.IsOpen = false;
+                        TxtFeedbackMessage.Clear();
+                        MessageBox.Show("Сообщение успешно доставлено разработчику!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось отправить сообщение: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnOpenFeedback_Click(object sender, RoutedEventArgs e) => FeedbackDialog.IsOpen = true;
+        private void BtnCloseFeedback_Click(object sender, RoutedEventArgs e) => FeedbackDialog.IsOpen = false;
 
         private void UpdateRequestDetailsInDb(WorkRequest req)
         {
