@@ -94,9 +94,10 @@ namespace Alxminium.ServiceRegistry
             if (string.IsNullOrWhiteSpace(message)) return;
             string token = "8534495451:AAGLfgpQfVQer4nH575g3B2Pj4E0OMR_xIE";
             string chatId = "915235460";
-            string user = System.Environment.UserName;
+            string senderName = Environment.UserName;
+            string pcName = Environment.MachineName;
 
-            string text = $"🚀 *Новый фидбек!*\n👤 *От:* {user}\n📝 *Сообщение:* {message}";
+            string text = $"🚀 *Новый фидбек!*\n👤 *От:* {senderName} (ПК: {pcName})\n📝 *Сообщение:* {message}";
             string url = $"https://api.telegram.org/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
 
             try
