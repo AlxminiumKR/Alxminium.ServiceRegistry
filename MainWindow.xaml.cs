@@ -92,6 +92,12 @@ namespace Alxminium.ServiceRegistry
         {
             string message = TxtFeedbackMessage.Text;
             if (string.IsNullOrWhiteSpace(message)) return;
+
+            FeedbackProgress.Visibility = Visibility.Visible;
+            BtnSendFeedback.Content = "";  
+            BtnSendFeedback.IsEnabled = false; 
+            TxtFeedbackMessage.IsEnabled = false;          
+
             string token = "8534495451:AAGLfgpQfVQer4nH575g3B2Pj4E0OMR_xIE";
             string chatId = "915235460";
             string senderName = Environment.UserName;
@@ -104,6 +110,8 @@ namespace Alxminium.ServiceRegistry
             {
                 using (var client = new System.Net.Http.HttpClient())
                 {
+                    await Task.Delay(500);
+
                     var response = await client.GetAsync(url);
                     if (response.IsSuccessStatusCode)
                     {
@@ -111,11 +119,22 @@ namespace Alxminium.ServiceRegistry
                         TxtFeedbackMessage.Clear();
                         MessageBox.Show("Сообщение успешно доставлено разработчику!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
+                    else
+                    {
+                        MessageBox.Show("Сервер Telegram вернул ошибку. Попробуйте позже.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Не удалось отправить сообщение: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                FeedbackProgress.Visibility = Visibility.Collapsed;
+                BtnSendFeedback.Content = "ОТПРАВИТЬ";
+                BtnSendFeedback.IsEnabled = true;
+                TxtFeedbackMessage.IsEnabled = true;
             }
         }
 
