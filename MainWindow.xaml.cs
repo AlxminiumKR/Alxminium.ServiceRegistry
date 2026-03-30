@@ -90,40 +90,49 @@ namespace Alxminium.ServiceRegistry
 
         private async void BtnSendFeedback_Click(object sender, RoutedEventArgs e)
         {
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
             string message = TxtFeedbackMessage.Text;
             if (string.IsNullOrWhiteSpace(message)) return;
 
             FeedbackProgress.Visibility = Visibility.Visible;
-            BtnSendFeedback.Content = "";  
-            BtnSendFeedback.IsEnabled = false; 
-            TxtFeedbackMessage.IsEnabled = false;          
+            BtnSendFeedback.Content = "";
+            BtnSendFeedback.IsEnabled = false;
+            TxtFeedbackMessage.IsEnabled = false;
 
+            string proxyUrl = "https://tg-proxy-alxminium.alxminium.workers.dev";
             string token = "8534495451:AAGLfgpQfVQer4nH575g3B2Pj4E0OMR_xIE";
             string chatId = "915235460";
             string senderName = Environment.UserName;
             string pcName = Environment.MachineName;
 
             string text = $"🚀 *Новый фидбек!*\n👤 *От:* {senderName} (ПК: {pcName})\n📝 *Сообщение:* {message}";
-            string url = $"https://api.telegram.org/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
+            string url = $"{proxyUrl}/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
 
             try
             {
                 using (var client = new System.Net.Http.HttpClient())
                 {
-                    await Task.Delay(500);
+                    client.Timeout = TimeSpan.FromSeconds(7);
 
                     var response = await client.GetAsync(url);
+
                     if (response.IsSuccessStatusCode)
                     {
                         FeedbackDialog.IsOpen = false;
                         TxtFeedbackMessage.Clear();
-                        MessageBox.Show("Сообщение успешно доставлено разработчику!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Сообщение успешно доставлено!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Сервер Telegram вернул ошибку. Попробуйте позже.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Ошибка: {response.StatusCode}\n{errorContent} Возможно, требуется VPN.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                MessageBox.Show("Время ожидания истекло. Возможно, требуется VPN.",
+                                "Ошибка соединения", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
@@ -662,7 +671,6 @@ namespace Alxminium.ServiceRegistry
 
                 UpdateRequestDetailsInDb(editingReq);
 
-                // Сбрасываем кнопку обратно
                 BtnCreateRequest.Content = "Создать заявку";
                 BtnCreateRequest.Tag = null;
 
