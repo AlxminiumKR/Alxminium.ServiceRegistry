@@ -5,7 +5,8 @@
         Title="Система учета заявок — alxminium" Height="700" Width="1100"
         WindowStartupLocation="CenterScreen" Background="#F5F5F5"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        Icon="Models/EmblemSR.png">
     <Grid>
         <materialDesign:DialogHost x:Name="FeedbackDialog" Identifier="RootDialog">
 

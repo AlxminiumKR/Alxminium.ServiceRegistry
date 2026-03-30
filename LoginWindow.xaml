@@ -7,7 +7,8 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         FocusManager.FocusedElement="{Binding ElementName=TxtLogin}"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Icon="Models/EmblemSR.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
