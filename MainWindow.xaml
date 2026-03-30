@@ -19,6 +19,28 @@
                 </DockPanel>
             </materialDesign:ColorZone>
 
+            <StatusBar DockPanel.Dock="Bottom" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
+                <StatusBarItem>
+                    <StackPanel Orientation="Horizontal" Margin="10,2">
+                        <materialDesign:PackIcon Kind="ChartBar" VerticalAlignment="Center" Foreground="#757575"/>
+                        <TextBlock Text="Всего заявок: " Margin="8,0,0,0" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtTotalCount" Text="0"/>
+
+                        <Separator Margin="16,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+
+                        <materialDesign:PackIcon Kind="ClockOutline" VerticalAlignment="Center" Foreground="#FFA000"/>
+                        <TextBlock Text=" В работе: " Margin="4,0,0,0" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtPendingCount" Text="0"/>
+
+                        <Separator Margin="16,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+
+                        <materialDesign:PackIcon Kind="CheckCircleOutline" VerticalAlignment="Center" Foreground="Green"/>
+                        <TextBlock Text=" Выполнено: " Margin="4,0,0,0" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtCompletedCount" Text="0"/>
+                    </StackPanel>
+                </StatusBarItem>
+            </StatusBar>
+
             <TabControl materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                         Style="{StaticResource MaterialDesignNavigationRailTabControl}">
 
@@ -31,13 +53,13 @@
                                      Width="24" Height="24"
                                      Foreground="White"/>
                                 <TextBlock Text="РЕГИСТРАЦИЯ" 
-                       TextWrapping="Wrap" 
-                       TextAlignment="Center" 
-                       FontSize="10" 
-                       FontFamily="{materialDesign:MaterialDesignFont}" 
-                       Foreground="White" 
-                       LineHeight="12" 
-                       LineStackingStrategy="BlockLineHeight"/>
+                                           TextWrapping="Wrap" 
+                                           TextAlignment="Center" 
+                                           FontSize="10" 
+                                           FontFamily="{materialDesign:MaterialDesignFont}" 
+                                           Foreground="White" 
+                                           LineHeight="12" 
+                                           LineStackingStrategy="BlockLineHeight"/>
                             </StackPanel>
                         </Grid>
                     </TabItem.Header>
@@ -57,16 +79,16 @@
                                           DisplayMemberPath="WorkName" Margin="0,0,0,20"/>
 
                                 <TextBox x:Name="TxtVolume" materialDesign:HintAssist.Hint="Объем работ (количество)" 
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
+                                          Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
 
                                 <TextBox x:Name="TxtDescription" 
-                                         materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                                         TextWrapping="Wrap" 
-                                         AcceptsReturn="True" 
-                                         VerticalScrollBarVisibility="Auto" 
-                                         MinHeight="80" 
-                                         Margin="0,0,0,32" Height="17"/>
+                                          materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
+                                          Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                          TextWrapping="Wrap" 
+                                          AcceptsReturn="True" 
+                                          VerticalScrollBarVisibility="Auto" 
+                                          MinHeight="80" 
+                                          Margin="0,0,0,32" Height="17"/>
 
                                 <Button Content="СОЗДАТЬ ЗАЯВКУ" Click="BtnCreateRequest_Click" 
                                         Height="50" materialDesign:ButtonAssist.CornerRadius="25"
@@ -95,9 +117,15 @@
                                 <CheckBox x:Name="ChkShowCompleted" Checked="Filter_Changed" Unchecked="Filter_Changed" 
                                           Content="Показать выполненные" VerticalAlignment="Center" Margin="0,0,24,0"/>
 
-                                <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="Дата С" Width="120" Margin="0,0,8,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                                <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Bottom" Margin="0,0,4,8" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBox x:Name="TxtSearch" materialDesign:HintAssist.Hint="Поиск по объекту или услуге" 
+                                         Width="220" Margin="0,0,24,0" 
+                                         TextChanged="TxtSearch_TextChanged"
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+
+                                <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="Дата С" Width="100" Margin="0,0,8,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
                                 <TextBlock Text="—" VerticalAlignment="Bottom" Margin="0,0,8,8"/>
-                                <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="Дата ПО" Width="120" Margin="0,0,24,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+                                <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="Дата ПО" Width="100" Margin="0,0,24,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
 
                                 <Button Content="ЭКСПОРТ EXCEL" Click="BtnExport_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
                                 <Button x:Name="BtnDeleteRequest" Content="УДАЛИТЬ" Click="BtnDeleteRequest_Click" 
@@ -115,7 +143,7 @@
                                     <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
                                     <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150"/>
                                     <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="150"/>
-                                    <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="150"/>
+                                    <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="100"/>
                                     <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">

@@ -27,6 +27,7 @@ namespace Alxminium.ServiceRegistry
             ComboServices.ItemsSource = DataStorage.ServiceTasks;
             this.Title += $" - Вы вошли как: {CurrentUser.Login} ({CurrentUser.Role})";
             //GridRequests.ItemsSource = DataStorage.Requests;
+            UpdateStatistics();
         }
         private void ApplyPermissions()
         {
@@ -78,6 +79,7 @@ namespace Alxminium.ServiceRegistry
                     }
                 }
                 RefreshRequestsGrid();
+                UpdateStatistics();
             }
             catch (Exception ex)
             {
@@ -217,7 +219,7 @@ namespace Alxminium.ServiceRegistry
                 MessageBox.Show("Ошибка обновления статуса в БД: " + ex.Message);
             }
         }
-        private void BtnImportServices_Click(object sender, RoutedEventArgs e)
+        /*private void BtnImportServices_Click(object sender, RoutedEventArgs e) #старый метод импорта услуг
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Excel Files|*.xlsx;*.xlsm;*.xlsb;*.xls";
@@ -252,18 +254,107 @@ namespace Alxminium.ServiceRegistry
                     MessageBox.Show($"Ошибка при импорте: {ex.Message}");
                 }
             }
+        }*/
+
+        private void BtnImportServices_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel Files|*.xlsx;*.xlsm;*.xlsb;*.xls";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    int addedCount = 0;
+                    int duplicateCount = 0;
+
+                    using (var workbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                        var worksheet = workbook.Worksheet(1);
+                        var range = worksheet.RangeUsed();
+                        if (range == null) return;
+
+                        var rows = range.RowsUsed().Skip(1);
+
+                        foreach (var row in rows)
+                        {
+                            string workName = row.Cell(1).GetValue<string>()?.Trim();
+                            string workType = row.Cell(2).GetValue<string>()?.Trim();
+
+                            int deadline = row.Cell(3).GetValue<int>();
+                            if (string.IsNullOrWhiteSpace(workName)) continue;
+
+                            bool exists = DataStorage.ServiceTasks.Any(t =>
+                                t.WorkName != null && t.WorkName.Equals(workName, StringComparison.OrdinalIgnoreCase));
+
+                            if (!exists)
+                            {
+                                var newTask = new ServiceTask
+                                {
+                                    Id = (DataStorage.ServiceTasks.Count > 0 ? DataStorage.ServiceTasks.Max(t => t.Id) : 0) + 1,
+                                    WorkName = workName,
+                                    WorkType = workType,
+                                    DeadlineDays = deadline
+                                };
+                                DataStorage.ServiceTasks.Add(newTask);
+                                addedCount++;
+                            }
+                            else
+                            {
+                                duplicateCount++;
+                            }
+                        }
+                    }
+
+                    MessageBox.Show($"Данные успешно импортированы!\nДобавлено: {addedCount}\nДубликатов пропущено: {duplicateCount} - alxminium");
+                    if (addedCount > 0) GridAllServices.Items.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при импорте: {ex.Message}");
+                }
+            }
         }
         private void RefreshRequestsGrid()
         {
-            if (ChkShowCompleted.IsChecked == true)
+            string searchText = TxtSearch.Text.Trim().ToLower();
+            var filtered = DataStorage.Requests.AsEnumerable();
+
+            if (ChkShowCompleted.IsChecked != true)
             {
-                GridRequests.ItemsSource = DataStorage.Requests;
+                filtered = filtered.Where(r => r.Status == "В работе");
             }
-            else
+
+            if (!string.IsNullOrWhiteSpace(searchText))
             {
-                GridRequests.ItemsSource = DataStorage.Requests
-                    .Where(r => r.Status == "В очереди")
-                    .ToList();
+                filtered = filtered.Where(r =>
+                    (r.ObjectName != null && r.ObjectName.ToLower().Contains(searchText)) ||
+                    (r.WorkName != null && r.WorkName.ToLower().Contains(searchText)) ||
+                    (r.Description != null && r.Description.ToLower().Contains(searchText))
+                );
+            }
+
+            GridRequests.ItemsSource = filtered.ToList();
+            UpdateStatistics();
+        }
+
+        private void TxtSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            RefreshRequestsGrid();
+        }
+        private void UpdateStatistics()
+        {
+            var allRequests = DataStorage.Requests;
+
+            if (allRequests != null)
+            {
+                int total = allRequests.Count;
+                int completed = allRequests.Count(r => r.Status == "Выполнена");
+                int pending = total - completed;
+
+                TxtTotalCount.Text = total.ToString();
+                TxtCompletedCount.Text = completed.ToString();
+                TxtPendingCount.Text = pending.ToString();
             }
         }
         private void Filter_Changed(object sender, RoutedEventArgs e)
@@ -285,11 +376,9 @@ namespace Alxminium.ServiceRegistry
                     try
                     {
                         DeleteRequestFromDb(selectedRequest.Id);
-
                         DataStorage.Requests.Remove(selectedRequest);
-
+                        UpdateStatistics();
                         RefreshRequestsGrid();
-
                         MessageBox.Show("Заявка успешно удалена из базы! - alxminium");
                     }
                     catch (Exception ex)
@@ -303,7 +392,7 @@ namespace Alxminium.ServiceRegistry
                 MessageBox.Show("Сначала выберите заявку в таблице, которую хотите удалить!");
             }
         }
-        private void BtnImportObjects_Click(object sender, RoutedEventArgs e)
+        /*private void BtnImportObjects_Click(object sender, RoutedEventArgs e) #старый метод импорта объектов
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Excel Files|*.xlsx;*.xlsm;*.xlsb;*.xls";
@@ -337,6 +426,64 @@ namespace Alxminium.ServiceRegistry
                     MessageBox.Show($"Ошибка импорта объектов: {ex.Message}");
                 }
             }
+        }*/
+        private void BtnImportObjects_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel Files|*.xlsx;*.xlsm;*.xlsb;*.xls";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    int addedCount = 0;
+                    int duplicateCount = 0;
+
+                    using (var workbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                        var worksheet = workbook.Worksheet(1);
+                        var range = worksheet.RangeUsed();
+                        if (range == null) return;
+
+                        var rows = range.RowsUsed().Skip(1);
+
+                        foreach (var row in rows)
+                        {
+                            string name = row.Cell(1).GetValue<string>()?.Trim();
+                            string address = row.Cell(2).GetValue<string>()?.Trim();
+                            string person = row.Cell(3).GetValue<string>()?.Trim();
+
+                            if (string.IsNullOrWhiteSpace(name)) continue;
+
+                            bool exists = DataStorage.Objects.Any(o =>
+                                o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                            if (!exists)
+                            {
+                                DataStorage.Objects.Add(new ServiceObject
+                                {
+                                    Id = (DataStorage.Objects.Count > 0 ? DataStorage.Objects.Max(x => x.Id) : 0) + 1,
+                                    Name = name,
+                                    Address = address,
+                                    ResponsiblePerson = person
+                                });
+                                addedCount++;
+                            }
+                            else
+                            {
+                                duplicateCount++;
+                            }
+                        }
+                    }
+
+                    MessageBox.Show($"Загрузка завершена!\nДобавлено: {addedCount}\nПропущено дублей: {duplicateCount} - alxminium");
+                    if (addedCount > 0) GridAllObjects.Items.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка импорта объектов: {ex.Message}");
+                }
+            }
         }
         private void GridRequests_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -344,6 +491,7 @@ namespace Alxminium.ServiceRegistry
             {
                 selectedRequest.Status = "Выполнена";
                 UpdateRequestStatusInDb(selectedRequest);
+                UpdateStatistics();
                 RefreshRequestsGrid();
                 MessageBox.Show($"Заявка №{selectedRequest.Id} завершена! - alxminium");
             }
@@ -399,7 +547,6 @@ namespace Alxminium.ServiceRegistry
             var selectedObject = ComboObjects.SelectedItem as ServiceObject;
             var selectedTask = ComboServices.SelectedItem as ServiceTask;
 
-            // Добавил проверку TxtDescription.Text, если описание обязательно
             if (selectedObject == null || selectedTask == null ||
                 string.IsNullOrEmpty(TxtVolume.Text) || string.IsNullOrEmpty(TxtDescription.Text))
             {
@@ -422,7 +569,7 @@ namespace Alxminium.ServiceRegistry
                 Description = TxtDescription.Text,
 
                 Volume = double.TryParse(TxtVolume.Text, out var vol) ? vol : 0,
-                Status = "В очереди",
+                Status = "В работе",
                 CreatedAt = DateTime.Now
             };
 
@@ -430,6 +577,7 @@ namespace Alxminium.ServiceRegistry
             {
                 DataStorage.Requests.Add(newRequest);
                 SaveRequestToDb(newRequest);
+                UpdateStatistics();
 
                 MessageBox.Show("Заявка успешно создана и данные законсервированы в MySQL!");
                 TxtVolume.Clear();
