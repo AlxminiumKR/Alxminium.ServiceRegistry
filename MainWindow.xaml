@@ -80,7 +80,7 @@
                         <TabItem.Header>
                             <StackPanel Width="80">
                                 <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="9" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </TabItem.Header>
 
