@@ -220,10 +220,10 @@
                                     <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportObjects_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
                                     <DataGrid x:Name="GridAllObjects" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource MaterialDesignDataGrid}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="40"/>
-                                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
-                                            <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="*"/>
-                                            <DataGridTextColumn Header="Ответственный" Binding="{Binding ResponsiblePerson}" Width="100"/>
+                                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="150"/>
+                                            <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="150"/>
+                                            <DataGridTextColumn Header="Ответственный" Binding="{Binding ResponsiblePerson}" Width="150"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>
@@ -233,12 +233,25 @@
                                 <DockPanel>
                                     <TextBlock Text="СПИСОК УСЛУГ" DockPanel.Dock="Top" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,10"/>
                                     <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportServices_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
                                     <DataGrid x:Name="GridAllServices" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource MaterialDesignDataGrid}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100"/>
-                                            <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="*"/>
-                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price}" Width="70"/>
-                                            <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="75"/>
+                                            <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="100"/>
+                                            <DataGridTemplateColumn Header="Описание" Width="*">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                   TextWrapping="Wrap" 
+                                                                   Padding="5"
+                                                                   MaxHeight="100" 
+                                                                   VerticalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:N2} ₽'}" Width="80"/>
+                                            <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="100"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>

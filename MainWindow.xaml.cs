@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Windows;
+using MySql.Data.MySqlClient;
 
 namespace Alxminium.ServiceRegistry
 {
@@ -49,42 +50,54 @@ namespace Alxminium.ServiceRegistry
                     conn.Open();
 
                     string sql = @"
-                        SELECT id, author, section, object_id, object_name, 
-                        work_name, work_type, deadline_days, unit, price, 
-                        volume, total_cost, status, description, created_at 
-                        FROM requests";
+                    SELECT id, author, section, object_id, object_name, 
+                    work_name, work_type, deadline_days, unit, price, 
+                    volume, total_cost, status, description, created_at 
+                    FROM requests";
+
+                    if (CurrentUser.Role != "Admin")
+                    {
+                        sql += " WHERE author = @author";
+                    }
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
-                    using (var reader = cmd.ExecuteReader())
                     {
-                        DataStorage.Requests.Clear();
-
-                        while (reader.Read())
+                        if (CurrentUser.Role != "Admin")
                         {
-                            var req = new WorkRequest
+                            cmd.Parameters.AddWithValue("@author", CurrentUser.Login);
+                        }
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            DataStorage.Requests.Clear();
+
+                            while (reader.Read())
                             {
-                                Id = reader.GetInt32("id"),
-                                Author = reader.IsDBNull(reader.GetOrdinal("author")) ? "" : reader.GetString("author"),
-                                Section = reader.IsDBNull(reader.GetOrdinal("section")) ? "" : reader.GetString("section"),
-                                ObjectId = reader.IsDBNull(reader.GetOrdinal("object_id")) ? 0 : reader.GetInt32("object_id"),
+                                var req = new WorkRequest
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    Author = reader.IsDBNull(reader.GetOrdinal("author")) ? "" : reader.GetString("author"),
+                                    Section = reader.IsDBNull(reader.GetOrdinal("section")) ? "" : reader.GetString("section"),
+                                    ObjectId = reader.IsDBNull(reader.GetOrdinal("object_id")) ? 0 : reader.GetInt32("object_id"),
 
-                                ObjectName = reader.IsDBNull(reader.GetOrdinal("object_name")) ? "Не указан" : reader.GetString("object_name"),
-                                WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
-                                WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
+                                    ObjectName = reader.IsDBNull(reader.GetOrdinal("object_name")) ? "Не указан" : reader.GetString("object_name"),
+                                    WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
+                                    WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
 
-                                DeadlineDays = reader.IsDBNull(reader.GetOrdinal("deadline_days")) ? 0 : reader.GetInt32("deadline_days"),
-                                Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "" : reader.GetString("unit"),
-                                Price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0m : reader.GetDecimal("price"),
+                                    DeadlineDays = reader.IsDBNull(reader.GetOrdinal("deadline_days")) ? 0 : reader.GetInt32("deadline_days"),
+                                    Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "" : reader.GetString("unit"),
+                                    Price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0m : reader.GetDecimal("price"),
 
-                                Volume = reader.IsDBNull(reader.GetOrdinal("volume")) ? 0 : reader.GetDouble("volume"),
-                                TotalCost = reader.IsDBNull(reader.GetOrdinal("total_cost")) ? 0m : reader.GetDecimal("total_cost"),
-                                Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "В очереди" : reader.GetString("status"),
-                                Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
+                                    Volume = reader.IsDBNull(reader.GetOrdinal("volume")) ? 0 : reader.GetDouble("volume"),
+                                    TotalCost = reader.IsDBNull(reader.GetOrdinal("total_cost")) ? 0m : reader.GetDecimal("total_cost"),
+                                    Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "В очереди" : reader.GetString("status"),
+                                    Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
 
-                                CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime("created_at")
-                            };
+                                    CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime("created_at")
+                                };
 
-                            DataStorage.Requests.Add(req);
+                                DataStorage.Requests.Add(req);
+                            }
                         }
                     }
                 }
@@ -185,6 +198,13 @@ namespace Alxminium.ServiceRegistry
         {
             if (GridRequests.SelectedItem is WorkRequest selectedRequest)
             {
+                if (selectedRequest.Status == "Выполнена" && CurrentUser.Role != "Admin")
+                {
+                    MessageBox.Show("Вы не можете редактировать уже выполненную заявку.",
+                                    "Доступ ограничен", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    return;
+                }
+
                 TxtVolume.Text = selectedRequest.Volume.ToString();
                 TxtDescription.Text = selectedRequest.Description;
 
@@ -253,6 +273,7 @@ namespace Alxminium.ServiceRegistry
                                 Id = reader.GetInt32("id"),
                                 WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
                                 WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
+                                Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
                                 Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "шт." : reader.GetString("unit"),
                                 Price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0m : reader.GetDecimal("price"),
                                 DeadlineDays = reader.IsDBNull(reader.GetOrdinal("deadline_days")) ? 0 : reader.GetInt32("deadline_days")
@@ -391,20 +412,27 @@ namespace Alxminium.ServiceRegistry
                     int addedCount = 0;
                     int duplicateCount = 0;
 
+                    var db = new DatabaseManager();
+
                     using (var workbook = new ClosedXML.Excel.XLWorkbook(openFileDialog.FileName))
+                    using (var conn = db.GetConnection())
                     {
                         var worksheet = workbook.Worksheet(1);
                         var range = worksheet.RangeUsed();
                         if (range == null) return;
 
                         var rows = range.RowsUsed().Skip(1);
+                        conn.Open();
 
                         foreach (var row in rows)
                         {
-                            string category = row.Cell(1).GetValue<string>()?.Trim();
-                            string name = row.Cell(2).GetValue<string>()?.Trim();
-                            string unit = row.Cell(3).GetValue<string>()?.Trim() ?? "шт.";
-                            decimal price = row.Cell(4).TryGetValue<decimal>(out var p) ? p : 0m;
+                            string name = row.Cell(1).GetValue<string>()?.Trim();
+                            string category = row.Cell(2).GetValue<string>()?.Trim();
+                            string description = row.Cell(3).GetValue<string>()?.Trim();
+                            string unit = row.Cell(4).GetValue<string>()?.Trim() ?? "шт.";
+
+                            decimal price = row.Cell(5).TryGetValue<decimal>(out var p) ? p : 0m;
+                            int deadline = row.Cell(6).TryGetValue<int>(out var d) ? d : 7;
 
                             if (string.IsNullOrWhiteSpace(name)) continue;
 
@@ -413,15 +441,35 @@ namespace Alxminium.ServiceRegistry
 
                             if (!exists)
                             {
-                                var newTask = new ServiceTask
-                                {
-                                    WorkName = name,
-                                    WorkType = category,
-                                    Unit = unit,
-                                    Price = price
-                                };
 
-                                DataStorage.ServiceTasks.Add(newTask);
+                                string sql = @"INSERT INTO services (work_name, work_type, description, unit, price, deadline_days) 
+                                       VALUES (@name, @type, @desc, @unit, @price, @deadline);
+                                       SELECT LAST_INSERT_ID();";
+
+                                using (var cmd = new MySqlCommand(sql, conn))
+                                {
+                                    cmd.Parameters.AddWithValue("@name", name);
+                                    cmd.Parameters.AddWithValue("@type", string.IsNullOrEmpty(category) ? (object)DBNull.Value : category);
+                                    cmd.Parameters.AddWithValue("@desc", string.IsNullOrEmpty(description) ? (object)DBNull.Value : description);
+                                    cmd.Parameters.AddWithValue("@unit", unit);
+                                    cmd.Parameters.AddWithValue("@price", price);
+                                    cmd.Parameters.AddWithValue("@deadline", deadline);
+
+                                    int newId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                                    var newTask = new ServiceTask
+                                    {
+                                        Id = newId,
+                                        WorkName = name,
+                                        WorkType = category,
+                                        Description = description,
+                                        Unit = unit,
+                                        Price = price,
+                                        DeadlineDays = deadline
+                                    };
+
+                                    DataStorage.ServiceTasks.Add(newTask);
+                                }
                                 addedCount++;
                             }
                             else
@@ -566,13 +614,17 @@ namespace Alxminium.ServiceRegistry
                     int addedCount = 0;
                     int duplicateCount = 0;
 
-                    using (var workbook = new XLWorkbook(openFileDialog.FileName))
+                    var db = new DatabaseManager();
+
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook(openFileDialog.FileName))
+                    using (var conn = db.GetConnection())
                     {
                         var worksheet = workbook.Worksheet(1);
                         var range = worksheet.RangeUsed();
                         if (range == null) return;
 
                         var rows = range.RowsUsed().Skip(1);
+                        conn.Open();
 
                         foreach (var row in rows)
                         {
@@ -587,13 +639,26 @@ namespace Alxminium.ServiceRegistry
 
                             if (!exists)
                             {
-                                DataStorage.Objects.Add(new ServiceObject
+                                string sql = @"INSERT INTO objects (name, address, responsible) 
+                                       VALUES (@name, @address, @person);
+                                       SELECT LAST_INSERT_ID();";
+
+                                using (var cmd = new MySqlCommand(sql, conn))
                                 {
-                                    Id = (DataStorage.Objects.Count > 0 ? DataStorage.Objects.Max(x => x.Id) : 0) + 1,
-                                    Name = name,
-                                    Address = address,
-                                    ResponsiblePerson = person
-                                });
+                                    cmd.Parameters.AddWithValue("@name", name);
+                                    cmd.Parameters.AddWithValue("@address", string.IsNullOrEmpty(address) ? (object)DBNull.Value : address);
+                                    cmd.Parameters.AddWithValue("@person", string.IsNullOrEmpty(person) ? (object)DBNull.Value : person);
+
+                                    int newId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                                    DataStorage.Objects.Add(new ServiceObject
+                                    {
+                                        Id = newId,
+                                        Name = name,
+                                        Address = address,
+                                        ResponsiblePerson = person
+                                    });
+                                }
                                 addedCount++;
                             }
                             else
@@ -616,22 +681,22 @@ namespace Alxminium.ServiceRegistry
         {
             if (GridRequests.SelectedItem is WorkRequest selectedRequest)
             {
+                if (CurrentUser.Role != "Admin")
+                {
+                    MessageBox.Show("У вас недостаточно прав для изменения статуса заявки. Обратитесь к администратору.",
+                                    "Доступ ограничен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 if (selectedRequest.Status == "Выполнена")
                 {
-                    if (CurrentUser.Role != "Admin")
-                    {
-                        MessageBox.Show("У вас недостаточно прав для возврата заявки в работу. Обратитесь к администратору.",
-                                        "Доступ ограничен", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
                     selectedRequest.Status = "В работе";
-                    MessageBox.Show($"Заявка №{selectedRequest.Id} возвращена в работу! - alxminium");
+                    MessageBox.Show($"Заявка №{selectedRequest.Id} возвращена в работу!");
                 }
                 else
                 {
                     selectedRequest.Status = "Выполнена";
-                    MessageBox.Show($"Заявка №{selectedRequest.Id} завершена! - alxminium");
+                    MessageBox.Show($"Заявка №{selectedRequest.Id} завершена!");
                 }
 
                 UpdateRequestStatusInDb(selectedRequest);
