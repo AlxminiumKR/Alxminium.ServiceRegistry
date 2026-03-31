@@ -63,18 +63,13 @@ namespace Alxminium.ServiceRegistry
                         {
                             DataStorage.Requests.Add(new WorkRequest
                             {
-                                Id = reader.GetInt32("id"),
-                                Author = reader.GetString("author"),
-                                Section = reader.GetString("section"),
-                                ObjectId = reader.GetInt32("object_id"),
-                                ObjectName = reader.GetString("object_display_name"),
                                 WorkName = reader.GetString("frozen_name"),
                                 WorkType = reader.GetString("frozen_type"),
-                                DeadlineDays = reader.GetInt32("frozen_deadline"),
+                                Unit = reader.IsDBNull(reader.GetOrdinal("frozen_unit")) ? "" : reader.GetString("frozen_unit"),
+                                Price = reader.IsDBNull(reader.GetOrdinal("frozen_price")) ? 0 : reader.GetDecimal("frozen_price"),
                                 Volume = reader.GetDouble("volume"),
+                                TotalCost = reader.IsDBNull(reader.GetOrdinal("total_cost")) ? 0 : reader.GetDecimal("total_cost"),
                                 Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
-                                Status = reader.GetString("status"),
-                                CreatedAt = reader.GetDateTime("created_at")
                             });
                         }
                     }
@@ -239,7 +234,7 @@ namespace Alxminium.ServiceRegistry
                     using (var cmdServ = new MySql.Data.MySqlClient.MySqlCommand(sqlServ, conn))
                     using (var reader = cmdServ.ExecuteReader())
                     {
-                        DataStorage.ServiceTasks.Clear(); 
+                        DataStorage.ServiceTasks.Clear();
                         while (reader.Read())
                         {
                             DataStorage.ServiceTasks.Add(new ServiceTask
@@ -247,7 +242,8 @@ namespace Alxminium.ServiceRegistry
                                 Id = reader.GetInt32("id"),
                                 WorkName = reader.GetString("work_name"),
                                 WorkType = reader.GetString("work_type"),
-                                DeadlineDays = reader.GetInt32("deadline_days")
+                                Unit = reader.GetString("unit"),
+                                Price = reader.GetDecimal("price")
                             });
                         }
                     }
@@ -268,21 +264,18 @@ namespace Alxminium.ServiceRegistry
                 {
                     conn.Open();
                     string sql = @"INSERT INTO requests 
-                    (author, section, object_id, frozen_name, frozen_type, frozen_deadline, volume, description, status) 
-                    VALUES (@author, @section, @objId, @name, @type, @deadline, @vol, @desc, @status);
+                    (author, section, object_id, frozen_name, frozen_type, frozen_unit, frozen_price, volume, total_cost, description, status) 
+                    VALUES (@author, @section, @objId, @name, @type, @unit, @price, @vol, @total, @desc, @status);
                     SELECT LAST_INSERT_ID();";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue("@author", req.Author);
-                        cmd.Parameters.AddWithValue("@section", req.Section);
-                        cmd.Parameters.AddWithValue("@objId", req.ObjectId);
-                        cmd.Parameters.AddWithValue("@name", req.WorkName);
                         cmd.Parameters.AddWithValue("@type", req.WorkType);
-                        cmd.Parameters.AddWithValue("@deadline", req.DeadlineDays);
+                        cmd.Parameters.AddWithValue("@unit", req.Unit);
+                        cmd.Parameters.AddWithValue("@price", req.Price);
                         cmd.Parameters.AddWithValue("@vol", req.Volume);
+                        cmd.Parameters.AddWithValue("@total", req.TotalCost);
                         cmd.Parameters.AddWithValue("@desc", req.Description ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@status", req.Status);
 
                         var newId = cmd.ExecuteScalar();
                         if (newId != null)
@@ -369,34 +362,37 @@ namespace Alxminium.ServiceRegistry
                     int addedCount = 0;
                     int duplicateCount = 0;
 
-                    using (var workbook = new XLWorkbook(openFileDialog.FileName))
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook(openFileDialog.FileName))
                     {
                         var worksheet = workbook.Worksheet(1);
                         var range = worksheet.RangeUsed();
                         if (range == null) return;
 
+                        // Пропускаем заголовок
                         var rows = range.RowsUsed().Skip(1);
 
                         foreach (var row in rows)
                         {
-                            string workName = row.Cell(1).GetValue<string>()?.Trim();
-                            string workType = row.Cell(2).GetValue<string>()?.Trim();
+                            string category = row.Cell(1).GetValue<string>()?.Trim();
+                            string name = row.Cell(2).GetValue<string>()?.Trim();
+                            string unit = row.Cell(3).GetValue<string>()?.Trim() ?? "шт.";
+                            decimal price = row.Cell(4).TryGetValue<decimal>(out var p) ? p : 0m;
 
-                            int deadline = row.Cell(3).GetValue<int>();
-                            if (string.IsNullOrWhiteSpace(workName)) continue;
+                            if (string.IsNullOrWhiteSpace(name)) continue;
 
                             bool exists = DataStorage.ServiceTasks.Any(t =>
-                                t.WorkName != null && t.WorkName.Equals(workName, StringComparison.OrdinalIgnoreCase));
+                                t.WorkName != null && t.WorkName.Equals(name, StringComparison.OrdinalIgnoreCase));
 
                             if (!exists)
                             {
                                 var newTask = new ServiceTask
                                 {
-                                    Id = (DataStorage.ServiceTasks.Count > 0 ? DataStorage.ServiceTasks.Max(t => t.Id) : 0) + 1,
-                                    WorkName = workName,
-                                    WorkType = workType,
-                                    DeadlineDays = deadline
+                                    WorkName = name,
+                                    WorkType = category,
+                                    Unit = unit,
+                                    Price = price
                                 };
+
                                 DataStorage.ServiceTasks.Add(newTask);
                                 addedCount++;
                             }
@@ -407,12 +403,14 @@ namespace Alxminium.ServiceRegistry
                         }
                     }
 
-                    MessageBox.Show($"Данные успешно импортированы!\nДобавлено: {addedCount}\nДубликатов пропущено: {duplicateCount} - alxminium");
+                    MessageBox.Show($"Данные успешно импортированы!\nДобавлено: {addedCount}\nДубликатов пропущено: {duplicateCount} - alxminium",
+                                    "Импорт завершен", MessageBoxButton.OK, MessageBoxImage.Information);
+
                     if (addedCount > 0) GridAllServices.Items.Refresh();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при импорте: {ex.Message}");
+                    MessageBox.Show($"Ошибка при импорте: {ex.Message}", "Критический сбой", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -640,16 +638,16 @@ namespace Alxminium.ServiceRegistry
                         {
                             worksheet.Cell(currentRow, 1).Value = item.WorkName;
                             worksheet.Cell(currentRow, 2).Value = item.Volume;
-                            worksheet.Cell(currentRow, 3).Value = item.DeadlineDays + " дн.";
-                            worksheet.Cell(currentRow, 4).Value = item.ObjectName;
-                            worksheet.Cell(currentRow, 5).Value = item.CreatedAt.ToString("dd/MM/yy");
+                            worksheet.Cell(currentRow, 3).Value = item.Unit;
+                            worksheet.Cell(currentRow, 4).Value = item.Price;
+                            worksheet.Cell(currentRow, 5).Value = item.TotalCost;
+                            worksheet.Cell(currentRow, 6).Value = item.ObjectName;
                             currentRow++;
                         }
 
-                        worksheet.Cell(currentRow, 1).Value = $"{group.Key} итого";
+                        worksheet.Cell(currentRow, 1).Value = $"{group.Key} итого руб.:";
                         worksheet.Cell(currentRow, 1).Style.Font.Italic = true;
-                        worksheet.Cell(currentRow, 5).Value = group.Sum(x => x.Volume);
-                        currentRow += 2;
+                        worksheet.Cell(currentRow, 5).Value = group.Sum(x => x.TotalCost);
                     }
 
                     worksheet.Columns().AdjustToContents();
@@ -666,7 +664,7 @@ namespace Alxminium.ServiceRegistry
 
             if (BtnCreateRequest.Tag is WorkRequest editingReq)
             {
-                editingReq.Volume = double.TryParse(TxtVolume.Text, out var v) ? v : 0;
+                editingReq.Volume = double.TryParse(TxtVolume.Text, out var vEdit) ? vEdit : 0;
                 editingReq.Description = TxtDescription.Text;
 
                 UpdateRequestDetailsInDb(editingReq);
@@ -686,23 +684,23 @@ namespace Alxminium.ServiceRegistry
                 return;
             }
 
+            var vol = double.TryParse(TxtVolume.Text, out var volVal) ? volVal : 0;
 
             var newRequest = new WorkRequest
             {
                 Id = 0,
-                Author = "alxminium_user",
+                Author = CurrentUser.Login,
                 Section = "Участок №1",
                 ObjectId = selectedObject.Id,
                 ObjectName = selectedObject.Name,
-
                 WorkName = selectedTask.WorkName,
                 WorkType = selectedTask.WorkType,
-                DeadlineDays = selectedTask.DeadlineDays,
-
-                Description = TxtDescription.Text,
-
-                Volume = double.TryParse(TxtVolume.Text, out var vol) ? vol : 0,
+                Unit = selectedTask.Unit,
+                Price = selectedTask.Price,
+                Volume = vol,
+                TotalCost = selectedTask.Price * (decimal)vol,
                 Status = "В работе",
+                Description = TxtDescription.Text,
                 CreatedAt = DateTime.Now
             };
 
@@ -713,6 +711,7 @@ namespace Alxminium.ServiceRegistry
                 UpdateStatistics();
 
                 MessageBox.Show("Заявка успешно создана и данные законсервированы в MySQL!");
+
                 TxtVolume.Clear();
                 TxtDescription.Clear();
                 ComboObjects.SelectedIndex = -1;

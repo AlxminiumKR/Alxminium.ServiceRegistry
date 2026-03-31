@@ -9,8 +9,9 @@ namespace Alxminium.ServiceRegistry.Models
     public class ServiceTask
     {
         public int Id { get; set; }
-        public string WorkName { get; set; } 
-        public string WorkType { get; set; } 
-        public int DeadlineDays { get; set; }
+        public string WorkName { get; set; }
+        public string WorkType { get; set; }
+        public string Unit { get; set; }
+        public decimal Price { get; set; }
     }
 }
