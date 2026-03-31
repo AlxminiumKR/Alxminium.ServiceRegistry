@@ -256,7 +256,6 @@ namespace Alxminium.ServiceRegistry
                             DataStorage.ServiceTasks.Add(new ServiceTask
                             {
                                 Id = reader.GetInt32("id"),
-
                                 WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
                                 WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
                                 Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "шт." : reader.GetString("unit"),
@@ -266,6 +265,18 @@ namespace Alxminium.ServiceRegistry
                         }
                     }
                 }
+
+                GridAllObjects.ItemsSource = null;
+                GridAllObjects.ItemsSource = DataStorage.Objects;
+
+                GridAllServices.ItemsSource = null;
+                GridAllServices.ItemsSource = DataStorage.ServiceTasks;
+
+                ComboObjects.ItemsSource = null;
+                ComboObjects.ItemsSource = DataStorage.Objects;
+
+                ComboServices.ItemsSource = null;
+                ComboServices.ItemsSource = DataStorage.ServiceTasks;
             }
             catch (Exception ex)
             {
