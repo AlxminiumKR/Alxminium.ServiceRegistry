@@ -49,10 +49,12 @@ namespace Alxminium.ServiceRegistry
                 {
                     conn.Open();
 
+                    // SQL-запрос строго по твоей структуре
                     string sql = @"
-                    SELECT r.*, o.name as object_display_name 
-                    FROM requests r 
-                    JOIN objects o ON r.object_id = o.id";
+                SELECT id, author, section, object_id, object_name, 
+                       work_name, work_type, deadline_days, unit, price, 
+                       volume, total_cost, status, description, created_at 
+                FROM requests";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
                     using (var reader = cmd.ExecuteReader())
@@ -61,16 +63,30 @@ namespace Alxminium.ServiceRegistry
 
                         while (reader.Read())
                         {
-                            DataStorage.Requests.Add(new WorkRequest
+                            var req = new WorkRequest
                             {
-                                WorkName = reader.GetString("frozen_name"),
-                                WorkType = reader.GetString("frozen_type"),
-                                Unit = reader.IsDBNull(reader.GetOrdinal("frozen_unit")) ? "" : reader.GetString("frozen_unit"),
-                                Price = reader.IsDBNull(reader.GetOrdinal("frozen_price")) ? 0 : reader.GetDecimal("frozen_price"),
-                                Volume = reader.GetDouble("volume"),
-                                TotalCost = reader.IsDBNull(reader.GetOrdinal("total_cost")) ? 0 : reader.GetDecimal("total_cost"),
+                                Id = reader.GetInt32("id"),
+                                Author = reader.IsDBNull(reader.GetOrdinal("author")) ? "" : reader.GetString("author"),
+                                Section = reader.IsDBNull(reader.GetOrdinal("section")) ? "" : reader.GetString("section"),
+                                ObjectId = reader.IsDBNull(reader.GetOrdinal("object_id")) ? 0 : reader.GetInt32("object_id"),
+
+                                ObjectName = reader.IsDBNull(reader.GetOrdinal("object_name")) ? "Не указан" : reader.GetString("object_name"),
+                                WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
+                                WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
+
+                                DeadlineDays = reader.IsDBNull(reader.GetOrdinal("deadline_days")) ? 0 : reader.GetInt32("deadline_days"),
+                                Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "" : reader.GetString("unit"),
+                                Price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0m : reader.GetDecimal("price"),
+
+                                Volume = reader.IsDBNull(reader.GetOrdinal("volume")) ? 0 : reader.GetDouble("volume"),
+                                TotalCost = reader.IsDBNull(reader.GetOrdinal("total_cost")) ? 0m : reader.GetDecimal("total_cost"),
+                                Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "В очереди" : reader.GetString("status"),
                                 Description = reader.IsDBNull(reader.GetOrdinal("description")) ? "" : reader.GetString("description"),
-                            });
+
+                                CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime("created_at")
+                            };
+
+                            DataStorage.Requests.Add(req);
                         }
                     }
                 }
@@ -79,7 +95,7 @@ namespace Alxminium.ServiceRegistry
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке с JOIN: " + ex.Message);
+                MessageBox.Show("Ошибка при загрузке заявок: " + ex.Message);
             }
         }
 
@@ -223,7 +239,7 @@ namespace Alxminium.ServiceRegistry
                             DataStorage.Objects.Add(new ServiceObject
                             {
                                 Id = reader.GetInt32("id"),
-                                Name = reader.GetString("name"),
+                                Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "Без названия" : reader.GetString("name"),
                                 Address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address"),
                                 ResponsiblePerson = reader.IsDBNull(reader.GetOrdinal("responsible")) ? "" : reader.GetString("responsible")
                             });
@@ -240,10 +256,12 @@ namespace Alxminium.ServiceRegistry
                             DataStorage.ServiceTasks.Add(new ServiceTask
                             {
                                 Id = reader.GetInt32("id"),
-                                WorkName = reader.GetString("work_name"),
-                                WorkType = reader.GetString("work_type"),
-                                Unit = reader.GetString("unit"),
-                                Price = reader.GetDecimal("price")
+
+                                WorkName = reader.IsDBNull(reader.GetOrdinal("work_name")) ? "Без названия" : reader.GetString("work_name"),
+                                WorkType = reader.IsDBNull(reader.GetOrdinal("work_type")) ? "" : reader.GetString("work_type"),
+                                Unit = reader.IsDBNull(reader.GetOrdinal("unit")) ? "шт." : reader.GetString("unit"),
+                                Price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0m : reader.GetDecimal("price"),
+                                DeadlineDays = reader.IsDBNull(reader.GetOrdinal("deadline_days")) ? 0 : reader.GetInt32("deadline_days")
                             });
                         }
                     }
@@ -251,7 +269,7 @@ namespace Alxminium.ServiceRegistry
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки справочников из БД: " + ex.Message);
+                MessageBox.Show("Ошибка загрузки справочников: " + ex.Message);
             }
         }
 
@@ -264,24 +282,29 @@ namespace Alxminium.ServiceRegistry
                 {
                     conn.Open();
                     string sql = @"INSERT INTO requests 
-                    (author, section, object_id, frozen_name, frozen_type, frozen_unit, frozen_price, volume, total_cost, description, status) 
-                    VALUES (@author, @section, @objId, @name, @type, @unit, @price, @vol, @total, @desc, @status);
-                    SELECT LAST_INSERT_ID();";
+                                (author, section, object_id, object_name, work_name, work_type, deadline_days, unit, price, volume, total_cost, description, status) 
+                                VALUES 
+                                (@author, @section, @objId, @objName, @workName, @workType, @deadline, @unit, @price, @vol, @total, @desc, @status);
+                                SELECT LAST_INSERT_ID();";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue("@type", req.WorkType);
+                        cmd.Parameters.AddWithValue("@author", req.Author);
+                        cmd.Parameters.AddWithValue("@section", req.Section);
+                        cmd.Parameters.AddWithValue("@objId", req.ObjectId);
+                        cmd.Parameters.AddWithValue("@objName", req.ObjectName);
+                        cmd.Parameters.AddWithValue("@workName", req.WorkName);
+                        cmd.Parameters.AddWithValue("@workType", req.WorkType);
+                        cmd.Parameters.AddWithValue("@deadline", req.DeadlineDays);
                         cmd.Parameters.AddWithValue("@unit", req.Unit);
                         cmd.Parameters.AddWithValue("@price", req.Price);
                         cmd.Parameters.AddWithValue("@vol", req.Volume);
                         cmd.Parameters.AddWithValue("@total", req.TotalCost);
                         cmd.Parameters.AddWithValue("@desc", req.Description ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@status", req.Status);
 
                         var newId = cmd.ExecuteScalar();
-                        if (newId != null)
-                        {
-                            req.Id = Convert.ToInt32(newId);
-                        }
+                        if (newId != null) req.Id = Convert.ToInt32(newId);
                     }
                 }
             }
@@ -613,6 +636,14 @@ namespace Alxminium.ServiceRegistry
         }
         private void BtnExport_Click(object sender, RoutedEventArgs e)
         {
+            bool hasCompleted = DataStorage.Requests.Any(r => r.Status == "Выполнена");
+
+            if (!hasCompleted)
+            {
+                MessageBox.Show("В архиве нет заявок со статусом 'Выполнена'. Сначала завершите работу над заявкой (смените статус), чтобы сформировать акт.",
+                                "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
             var saveFileDialog = new SaveFileDialog { Filter = "Excel|*.xlsx", FileName = "Отчет_alxminium" };
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -695,6 +726,7 @@ namespace Alxminium.ServiceRegistry
                 ObjectName = selectedObject.Name,
                 WorkName = selectedTask.WorkName,
                 WorkType = selectedTask.WorkType,
+                DeadlineDays = selectedTask.DeadlineDays,
                 Unit = selectedTask.Unit,
                 Price = selectedTask.Price,
                 Volume = vol,

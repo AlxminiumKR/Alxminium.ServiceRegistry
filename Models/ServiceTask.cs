@@ -13,5 +13,6 @@ namespace Alxminium.ServiceRegistry.Models
         public string WorkType { get; set; }
         public string Unit { get; set; }
         public decimal Price { get; set; }
+        public int DeadlineDays { get; set; }
     }
 }
