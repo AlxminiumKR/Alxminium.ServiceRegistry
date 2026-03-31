@@ -49,12 +49,11 @@ namespace Alxminium.ServiceRegistry
                 {
                     conn.Open();
 
-                    // SQL-запрос строго по твоей структуре
                     string sql = @"
-                SELECT id, author, section, object_id, object_name, 
+                        SELECT id, author, section, object_id, object_name, 
                        work_name, work_type, deadline_days, unit, price, 
                        volume, total_cost, status, description, created_at 
-                FROM requests";
+                        FROM requests";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
                     using (var reader = cmd.ExecuteReader())
