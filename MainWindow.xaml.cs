@@ -21,7 +21,6 @@ namespace Alxminium.ServiceRegistry
 
             LoadReferenceData();
             LoadRequestsFromDb();
-
             //DataStorage.InitializeMockData();
 
             ComboObjects.ItemsSource = DataStorage.Objects;
@@ -51,8 +50,8 @@ namespace Alxminium.ServiceRegistry
 
                     string sql = @"
                         SELECT id, author, section, object_id, object_name, 
-                       work_name, work_type, deadline_days, unit, price, 
-                       volume, total_cost, status, description, created_at 
+                        work_name, work_type, deadline_days, unit, price, 
+                        volume, total_cost, status, description, created_at 
                         FROM requests";
 
                     using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
@@ -109,14 +108,11 @@ namespace Alxminium.ServiceRegistry
             BtnSendFeedback.IsEnabled = false;
             TxtFeedbackMessage.IsEnabled = false;
 
-            string proxyUrl = "https://tg-proxy-alxminium.alxminium.workers.dev";
-            string token = "8534495451:AAGLfgpQfVQer4nH575g3B2Pj4E0OMR_xIE";
-            string chatId = "915235460";
             string senderName = Environment.UserName;
             string pcName = Environment.MachineName;
 
             string text = $"🚀 *Новый фидбек!*\n👤 *От:* {senderName} (ПК: {pcName})\n📝 *Сообщение:* {message}";
-            string url = $"{proxyUrl}/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
+            string url = $"{Secrets.ProxyUrl}/bot{Secrets.Token}/sendMessage?chat_id={Secrets.ChatId}&text={Uri.EscapeDataString(text)}&parse_mode=Markdown";
 
             try
             {
