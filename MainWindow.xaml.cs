@@ -401,7 +401,6 @@ namespace Alxminium.ServiceRegistry
                         var range = worksheet.RangeUsed();
                         if (range == null) return;
 
-                        // Пропускаем заголовок
                         var rows = range.RowsUsed().Skip(1);
 
                         foreach (var row in rows)
