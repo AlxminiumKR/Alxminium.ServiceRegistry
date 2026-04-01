@@ -7,9 +7,30 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Icon="Models/EmblemSR.png">
+    <Window.Resources>
+        <Style x:Key="WrapTextColumnStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="WrapHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                                   TextWrapping="Wrap" 
+                                   TextAlignment="Left" 
+                                   MaxHeight="40"
+                                   FontWeight="Bold"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <materialDesign:DialogHost x:Name="FeedbackDialog" Identifier="RootDialog">
-
             <materialDesign:DialogHost.DialogContent>
                 <StackPanel Margin="24" Width="350">
                     <TextBlock Text="ОБРАТНАЯ СВЯЗЬ" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,8"/>
@@ -24,13 +45,11 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
                         <Button Content="ОТМЕНА" Click="BtnCloseFeedback_Click" 
-                                 Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
-
+                               Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
                         <Grid>
                             <Button x:Name="BtnSendFeedback" Content="ОТПРАВИТЬ" 
                                     Click="BtnSendFeedback_Click" 
                                     Style="{StaticResource MaterialDesignRaisedButton}"/>
-
                             <ProgressBar x:Name="FeedbackProgress" 
                                          Style="{StaticResource MaterialDesignCircularProgressBar}" 
                                          Value="0" IsIndeterminate="True" 
@@ -80,33 +99,27 @@
                         <TabItem.Header>
                             <StackPanel Width="80">
                                 <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="9" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="8" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </TabItem.Header>
-
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <materialDesign:Card Margin="40" Padding="32" MaxWidth="500" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                                               UniformCornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp3">
+                                                 UniformCornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp3">
                                 <StackPanel>
                                     <TextBlock Text="Новая заявка" Style="{StaticResource MaterialDesignHeadline5TextBlock}" Margin="0,0,0,24"/>
-
                                     <ComboBox x:Name="ComboObjects" materialDesign:HintAssist.Hint="Выберите объект обслуживания" 
                                               Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
                                               DisplayMemberPath="Name" Margin="0,0,0,20"/>
-
                                     <ComboBox x:Name="ComboServices" materialDesign:HintAssist.Hint="Тип работы / Услуга" 
                                               Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
                                               DisplayMemberPath="WorkName" Margin="0,0,0,20"/>
-
                                     <TextBox x:Name="TxtVolume" materialDesign:HintAssist.Hint="Объем работ (количество)" 
-                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
-
+                                              Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,0,0,20"/>
                                     <TextBox x:Name="TxtDescription" 
-                                             materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
-                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                                             TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
-                                             MinHeight="80" Margin="0,0,0,32"/>
-
+                                              materialDesign:HintAssist.Hint="Описание проблемы / Комментарий" 
+                                              Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                              TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                                              MinHeight="80" Margin="0,0,0,32"/>
                                     <Button x:Name="BtnCreateRequest" Content="СОЗДАТЬ ЗАЯВКУ" Click="BtnCreateRequest_Click" 
                                             Height="50" materialDesign:ButtonAssist.CornerRadius="25"
                                             Style="{StaticResource MaterialDesignRaisedButton}"/>
@@ -122,7 +135,6 @@
                                 <TextBlock Text="АРХИВ" FontSize="10" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
-
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -132,22 +144,16 @@
                             <materialDesign:Card Padding="12" Margin="0,0,0,20" materialDesign:ElevationAssist.Elevation="Dp1">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox x:Name="ChkShowCompleted" Checked="Filter_Changed" Unchecked="Filter_Changed" 
-                                             Content="Показать выполненные" VerticalAlignment="Center" Margin="0,0,24,0"/>
-
+                                              Content="Показать выполненные" VerticalAlignment="Center" Margin="0,0,24,0"/>
                                     <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Bottom" Margin="0,0,4,8" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                                     <TextBox x:Name="TxtSearch" materialDesign:HintAssist.Hint="Поиск по объекту или услуге" 
-                                             Width="220" Margin="0,0,24,0" 
-                                             TextChanged="TxtSearch_TextChanged"
-                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
-
+                                              Width="220" Margin="0,0,24,0" 
+                                              TextChanged="TxtSearch_TextChanged"
+                                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
                                     <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="Дата С" Width="100" Margin="0,0,8,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
                                     <TextBlock Text="—" VerticalAlignment="Bottom" Margin="0,0,8,8"/>
                                     <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="Дата ПО" Width="100" Margin="0,0,24,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
-
-                                    <Button Click="BtnExport_Click" 
-                                            Style="{StaticResource MaterialDesignFlatButton}" 
-                                            Foreground="#2E7D32" Padding="8,4"
-                                            ToolTip="Выгрузить акты в Excel (только выполненные)">
+                                    <Button Click="BtnExport_Click" Style="{StaticResource MaterialDesignFlatButton}" Foreground="#2E7D32" Padding="8,4">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="FileExcel" Width="20" Height="20" VerticalAlignment="Center"/>
                                             <TextBlock Text="ЭКСПОРТ EXCEL" Margin="8,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
@@ -160,7 +166,8 @@
                                 <DataGrid x:Name="GridRequests" MouseDoubleClick="GridRequests_MouseDoubleClick" 
                                           AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}" 
                                           CanUserAddRows="False" SelectionMode="Single"
-                                          Style="{StaticResource MaterialDesignDataGrid}">
+                                          Style="{StaticResource MaterialDesignDataGrid}"
+                                          ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
                                     <DataGrid.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Редактировать" Click="MenuEditRequest_Click">
@@ -176,17 +183,16 @@
                                             </MenuItem>
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
-
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="95"/>
-                                        <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150"/>
-                                        <DataGridTextColumn Header="Работа" Binding="{Binding WorkName}" Width="150"/>
-                                        <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="120"/>
-                                        <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="120"/>
+                                        <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
+                                        <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                        <DataGridTextColumn Header="Работа" Binding="{Binding WorkName}" Width="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                        <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="80"/>
+                                        <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="80"/>
                                         <DataGridTextColumn Header="Сумма" Binding="{Binding TotalCost, StringFormat='{}{0:N2} ₽'}" Width="100"/>
-                                        <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="120">
+                                        <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="110">
                                             <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource WrapTextColumnStyle}">
                                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                                     <Style.Triggers>
                                                         <Trigger Property="Text" Value="Выполнена">
@@ -199,7 +205,7 @@
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
-                                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*" MinWidth="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </materialDesign:Card>
@@ -218,12 +224,14 @@
                                 <DockPanel>
                                     <TextBlock Text="РЕЕСТР ОБЪЕКТОВ" DockPanel.Dock="Top" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,10"/>
                                     <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportObjects_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
-                                    <DataGrid x:Name="GridAllObjects" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource MaterialDesignDataGrid}">
+                                    <DataGrid x:Name="GridAllObjects" AutoGenerateColumns="False" IsReadOnly="True" 
+                                              Style="{StaticResource MaterialDesignDataGrid}"
+                                              ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="150"/>
-                                            <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="150"/>
-                                            <DataGridTextColumn Header="Ответственный" Binding="{Binding ResponsiblePerson}" Width="150"/>
+                                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="*" MinWidth="100" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTextColumn Header="Ответственный" Binding="{Binding ResponsiblePerson}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>
@@ -233,25 +241,21 @@
                                 <DockPanel>
                                     <TextBlock Text="СПИСОК УСЛУГ" DockPanel.Dock="Top" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,10"/>
                                     <Button Content="ИМПОРТ ИЗ EXCEL" Click="BtnImportServices_Click" DockPanel.Dock="Bottom" Margin="0,15,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"/>
-
-                                    <DataGrid x:Name="GridAllServices" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource MaterialDesignDataGrid}">
+                                    <DataGrid x:Name="GridAllServices" AutoGenerateColumns="False" IsReadOnly="True" 
+                                              Style="{StaticResource MaterialDesignDataGrid}"
+                                              ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100"/>
-                                            <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="100"/>
-                                            <DataGridTemplateColumn Header="Описание" Width="*">
+                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTemplateColumn Header="Описание" Width="*" MinWidth="150">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding Description}" 
-                                                                   TextWrapping="Wrap" 
-                                                                   Padding="5"
-                                                                   MaxHeight="100" 
-                                                                   VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Padding="5" VerticalAlignment="Center"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
-
-                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:N2} ₽'}" Width="80"/>
-                                            <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="100"/>
+                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:N2} ₽'}" Width="90"/>
+                                            <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="80"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>
@@ -264,10 +268,8 @@
 
         <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                Margin="0,0,28,80" 
-                Background="#673AB7" BorderBrush="#673AB7"
-                ToolTip="Написать разработчику"
-                Click="BtnOpenFeedback_Click">
+                Margin="0,0,28,80" Background="#673AB7" BorderBrush="#673AB7"
+                Click="BtnOpenFeedback_Click">  
             <materialDesign:PackIcon Kind="MessageReplyText" Width="22" Height="22" />
         </Button>
     </Grid>

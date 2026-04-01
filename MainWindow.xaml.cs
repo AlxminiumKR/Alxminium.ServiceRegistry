@@ -37,6 +37,8 @@ namespace Alxminium.ServiceRegistry
                 if (TabAdmin != null)
                 {
                     TabAdmin.Visibility = Visibility.Collapsed;
+                    GridAllObjects.ContextMenu = null;
+                    GridAllServices.ContextMenu = null;
                 }
             }
         }
@@ -539,6 +541,13 @@ namespace Alxminium.ServiceRegistry
 
         private void BtnDeleteRequest_Click(object sender, RoutedEventArgs e)
         {
+            if (CurrentUser?.Role != "Admin")
+            {
+                MessageBox.Show("Ошибка доступа: Удалять заявки может только Администратор.",
+                                "alxminium Security", MessageBoxButton.OK, MessageBoxImage.Stop);
+                return;
+            }
+
             if (GridRequests.SelectedItem is WorkRequest selectedRequest)
             {
                 var result = MessageBox.Show($"Вы уверены, что хотите безвозвратно удалить заявку №{selectedRequest.Id}?",
@@ -551,9 +560,12 @@ namespace Alxminium.ServiceRegistry
                     try
                     {
                         DeleteRequestFromDb(selectedRequest.Id);
+
                         DataStorage.Requests.Remove(selectedRequest);
+
                         UpdateStatistics();
                         RefreshRequestsGrid();
+
                         MessageBox.Show("Заявка успешно удалена из базы! - alxminium");
                     }
                     catch (Exception ex)
@@ -824,6 +836,92 @@ namespace Alxminium.ServiceRegistry
             catch (Exception ex)
             {
                 MessageBox.Show("Произошла ошибка: " + ex.Message);
+            }
+        }
+
+        private void DeleteObjectFromDb(int objectId)
+        {
+            var db = new DatabaseManager();
+            using (var conn = db.GetConnection())
+            {
+                conn.Open();
+                string sql = "DELETE FROM objects WHERE id = @id";
+                using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", objectId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void BtnDeleteObject_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentUser.Role != "Admin") return;
+
+            if (GridAllObjects.SelectedItem is ServiceObject selected)
+            {
+                var result = MessageBox.Show($"Удалить объект \"{selected.Name}\"?\nВНИМАНИЕ: Если на этот объект завязаны заявки, база может выдать ошибку.",
+                    "Удаление объекта", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        DeleteObjectFromDb(selected.Id);
+                        DataStorage.Objects.Remove(selected);
+                        ComboObjects.ItemsSource = null;
+                        ComboObjects.ItemsSource = DataStorage.Objects;
+
+                        MessageBox.Show("Объект успешно удален.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Ошибка! Возможно, объект используется в заявках.\nДетали: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void DeleteServiceFromDb(int serviceId)
+        {
+            var db = new DatabaseManager();
+            using (var conn = db.GetConnection())
+            {
+                conn.Open();
+                string sql = "DELETE FROM services WHERE id = @id";
+                using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", serviceId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void BtnDeleteService_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentUser.Role != "Admin") return;
+
+            if (GridAllServices.SelectedItem is ServiceTask selected)
+            {
+                var result = MessageBox.Show($"Удалить услугу \"{selected.WorkName}\"?",
+                    "Удаление услуги", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        DeleteServiceFromDb(selected.Id);
+                        DataStorage.ServiceTasks.Remove(selected);
+                        ComboServices.ItemsSource = null;
+                        ComboServices.ItemsSource = DataStorage.ServiceTasks;
+
+                        MessageBox.Show("Услуга удалена.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Не удалось удалить услугу: " + ex.Message);
+                    }
+                }
             }
         }
     }
