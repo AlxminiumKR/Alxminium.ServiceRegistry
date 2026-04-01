@@ -245,7 +245,7 @@
                                               Style="{StaticResource MaterialDesignDataGrid}"
                                               ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="105" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                             <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                             <DataGridTemplateColumn Header="Описание" Width="*" MinWidth="150">
                                                 <DataGridTemplateColumn.CellTemplate>
