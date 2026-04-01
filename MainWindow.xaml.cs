@@ -718,6 +718,7 @@ namespace Alxminium.ServiceRegistry
         }
         private void BtnExport_Click(object sender, RoutedEventArgs e)
         {
+            // 1. Проверка на наличие выполненных заявок
             bool hasCompleted = DataStorage.Requests.Any(r => r.Status == "Выполнена");
 
             if (!hasCompleted)
@@ -726,13 +727,23 @@ namespace Alxminium.ServiceRegistry
                                 "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
             var saveFileDialog = new SaveFileDialog { Filter = "Excel|*.xlsx", FileName = "Отчет_alxminium" };
             if (saveFileDialog.ShowDialog() == true)
             {
                 using (var workbook = new XLWorkbook())
                 {
-                    var worksheet = workbook.Worksheets.Add("Акты");
+                    var worksheet = workbook.Worksheets.Add("Акты выполненных работ");
                     int currentRow = 1;
+
+                    var titleRange = worksheet.Range(currentRow, 1, currentRow, 6);
+                    titleRange.Merge();
+                    titleRange.Value = $"Отчет по выполненным заявкам на {DateTime.Now:dd.MM.yyyy}";
+                    titleRange.Style.Font.Bold = true;
+                    titleRange.Style.Font.FontSize = 16;
+                    titleRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    titleRange.Style.Font.FontColor = XLColor.DarkSlateGray;
+                    currentRow += 2;
 
                     var groups = DataStorage.Requests
                         .Where(r => r.Status == "Выполнена")
@@ -740,11 +751,26 @@ namespace Alxminium.ServiceRegistry
 
                     foreach (var group in groups)
                     {
-                        var headerCell = worksheet.Cell(currentRow, 1);
-                        headerCell.Value = group.Key;
-                        headerCell.Style.Font.Bold = true;
-                        headerCell.Style.Fill.BackgroundColor = XLColor.LightGray;
-                        worksheet.Range(currentRow, 1, currentRow, 5).Merge();
+                        var headerRange = worksheet.Range(currentRow, 1, currentRow, 6);
+                        headerRange.Merge();
+                        headerRange.Value = group.Key;
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Font.FontSize = 14;
+                        headerRange.Style.Fill.BackgroundColor = XLColor.LightSteelBlue;
+                        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Medium;
+                        currentRow++;
+
+                        string[] columns = { "Наименование услуги", "Объем", "Ед. изм.", "Цена", "Сумма", "Объект" };
+                        for (int i = 0; i < columns.Length; i++)
+                        {
+                            var cell = worksheet.Cell(currentRow, i + 1);
+                            cell.Value = columns[i];
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Fill.BackgroundColor = XLColor.WhiteSmoke;
+                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        }
                         currentRow++;
 
                         foreach (var item in group)
@@ -753,20 +779,43 @@ namespace Alxminium.ServiceRegistry
                             worksheet.Cell(currentRow, 2).Value = item.Volume;
                             worksheet.Cell(currentRow, 3).Value = item.Unit;
                             worksheet.Cell(currentRow, 4).Value = item.Price;
+                            worksheet.Cell(currentRow, 4).Style.NumberFormat.Format = "#,##0.00 ₽";
+
                             worksheet.Cell(currentRow, 5).Value = item.TotalCost;
+                            worksheet.Cell(currentRow, 5).Style.NumberFormat.Format = "#,##0.00 ₽";
+
                             worksheet.Cell(currentRow, 6).Value = item.ObjectName;
+
+                            worksheet.Range(currentRow, 1, currentRow, 6).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            worksheet.Range(currentRow, 1, currentRow, 6).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
                             currentRow++;
                         }
 
-                        worksheet.Cell(currentRow, 1).Value = $"{group.Key} итого руб.:";
-                        worksheet.Cell(currentRow, 1).Style.Font.Italic = true;
-                        worksheet.Cell(currentRow, 5).Value = group.Sum(x => x.TotalCost);
+                        worksheet.Range(currentRow, 1, currentRow, 4).Merge();
+                        var footerText = worksheet.Cell(currentRow, 1);
+                        footerText.Value = $"Итого по категории «{group.Key}»:";
+                        footerText.Style.Font.Italic = true;
+                        footerText.Style.Font.Bold = true;
+                        footerText.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                        var footerSum = worksheet.Cell(currentRow, 5);
+                        footerSum.Value = group.Sum(x => x.TotalCost);
+                        footerSum.Style.Font.Bold = true;
+                        footerSum.Style.NumberFormat.Format = "#,##0.00 ₽";
+
+                        worksheet.Range(currentRow, 1, currentRow, 6).Style.Border.TopBorder = XLBorderStyleValues.Medium;
+                        worksheet.Range(currentRow, 1, currentRow, 6).Style.Border.BottomBorder = XLBorderStyleValues.Medium;
+
+                        currentRow += 2;
                     }
 
                     worksheet.Columns().AdjustToContents();
+
                     workbook.SaveAs(saveFileDialog.FileName);
                 }
-                MessageBox.Show("Отчет успешно выгружен! - alxminium");
+
+                MessageBox.Show("Отчет успешно выгружен! - alxminium", "Экспорт завершен", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
