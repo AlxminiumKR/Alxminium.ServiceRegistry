@@ -95,11 +95,11 @@
                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                             Style="{StaticResource MaterialDesignNavigationRailTabControl}">
 
-                    <TabItem>
+                    <TabItem Cursor="">
                         <TabItem.Header>
                             <StackPanel Width="72">
                                 <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="8" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </TabItem.Header>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
