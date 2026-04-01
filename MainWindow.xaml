@@ -97,7 +97,7 @@
 
                     <TabItem>
                         <TabItem.Header>
-                            <StackPanel Width="80">
+                            <StackPanel Width="72">
                                 <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
                                 <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="8" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
@@ -130,7 +130,7 @@
 
                     <TabItem x:Name="TabArchive">
                         <TabItem.Header>
-                            <StackPanel Width="80">
+                            <StackPanel Width="72">
                                 <materialDesign:PackIcon Kind="FileTable" HorizontalAlignment="Center" Width="24" Height="24"/>
                                 <TextBlock Text="АРХИВ" FontSize="10" HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -214,7 +214,7 @@
 
                     <TabItem x:Name="TabAdmin">
                         <TabItem.Header>
-                            <StackPanel Width="80">
+                            <StackPanel Width="72">
                                 <materialDesign:PackIcon Kind="Settings" HorizontalAlignment="Center" Width="24" Height="24"/>
                                 <TextBlock Text="АДМИН" FontSize="10" HorizontalAlignment="Center"/>
                             </StackPanel>
