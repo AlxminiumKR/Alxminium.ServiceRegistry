@@ -1,13 +1,19 @@
 ﻿using Alxminium.ServiceRegistry.Models;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Win32;
+using MySql.Data.MySqlClient;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Windows;
-using MySql.Data.MySqlClient;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace Alxminium.ServiceRegistry
 {
@@ -19,6 +25,7 @@ namespace Alxminium.ServiceRegistry
             InitializeComponent();
             CurrentUser = user;
             ApplyPermissions();
+            ShowWelcomeAnimation(CurrentUser.Login);
 
             LoadReferenceData();
             LoadRequestsFromDb();
@@ -30,15 +37,43 @@ namespace Alxminium.ServiceRegistry
             //GridRequests.ItemsSource = DataStorage.Requests;
             UpdateStatistics();
         }
+        private void ShowWelcomeAnimation(string userName)
+        {
+            TxtWelcomeUser.Text = $"Рады видеть вас, {userName}!";
+
+            DoubleAnimation fadeAnimation = new DoubleAnimation
+            {
+                From = 1.0,
+                To = 0.0,
+                Duration = TimeSpan.FromSeconds(2),
+                BeginTime = TimeSpan.FromSeconds(2)
+            };
+
+            fadeAnimation.Completed += (s, e) => {
+                WelcomeOverlay.Visibility = Visibility.Collapsed;
+            };
+
+            WelcomeOverlay.BeginAnimation(Grid.OpacityProperty, fadeAnimation);
+        }
         private void ApplyPermissions()
         {
             if (CurrentUser.Role != "Admin")
             {
                 if (TabAdmin != null)
                 {
-                    TabAdmin.Visibility = Visibility.Collapsed;
-                    GridAllObjects.ContextMenu = null;
-                    GridAllServices.ContextMenu = null;
+                    TabAdmin.Visibility = Visibility.Hidden;
+                    TabAdmin.IsEnabled = false;
+
+                    if (GridAllObjects != null) GridAllObjects.ContextMenu = null;
+                    if (GridAllServices != null) GridAllServices.ContextMenu = null;
+                }
+            }
+            else
+            {
+                if (TabAdmin != null)
+                {
+                    TabAdmin.Visibility = Visibility.Visible;
+                    TabAdmin.IsEnabled = true;
                 }
             }
         }
@@ -492,6 +527,7 @@ namespace Alxminium.ServiceRegistry
                 }
             }
         }
+
         private void RefreshRequestsGrid()
         {
             string searchText = TxtSearch.Text.Trim().ToLower();
@@ -716,9 +752,75 @@ namespace Alxminium.ServiceRegistry
                 RefreshRequestsGrid();
             }
         }
+        private void BtnDownloadObjectsTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            string[] headers = { "name", "address", "responsible" };
+            GenerateExcelTemplate("Шаблон_Объекты.xlsx", headers);
+        }
+
+        private void BtnDownloadServicesTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            string[] headers = { "work_name", "work_type", "description", "unit", "price", "deadline_days" };
+            GenerateExcelTemplate("Шаблон_Услуги.xlsx", headers);
+        }
+
+        private void GenerateExcelTemplate(string fileName, string[] headers)
+        {
+            try
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    FileName = fileName,
+                    DefaultExt = ".xlsx",
+                    Filter = "Excel файлы (*.xlsx)|*.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    using (SpreadsheetDocument document = SpreadsheetDocument.Create(saveFileDialog.FileName, SpreadsheetDocumentType.Workbook))
+                    {
+                        WorkbookPart workbookPart = document.AddWorkbookPart();
+                        workbookPart.Workbook = new Workbook();
+
+                        WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                        worksheetPart.Worksheet = new Worksheet(new SheetData());
+
+                        Sheets sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
+                        Sheet sheet = new Sheet() { Id = document.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Шаблон" };
+                        sheets.Append(sheet);
+
+                        SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                        Row headerRow = new Row() { RowIndex = 1 };
+                        foreach (string header in headers)
+                        {
+                            Cell cell = new Cell() { DataType = CellValues.String, CellValue = new CellValue(header) };
+                            headerRow.AppendChild(cell);
+                        }
+                        sheetData.AppendChild(headerRow);
+
+                        workbookPart.Workbook.Save();
+                    }
+                    string folderPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+
+                    MainSnackbar.MessageQueue?.Enqueue(
+                        "Шаблон сохранен!",
+                        "ОТКРЫТЬ ПАПКУ",
+                        () =>
+                        {
+                            try { System.Diagnostics.Process.Start("explorer.exe", folderPath); }
+                            catch { /* тут я это вставил на случай ошибки доступа, чет не придумал лучшее решение */ }
+                        }
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при генерации Excel: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void BtnExport_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Проверка на наличие выполненных заявок
             bool hasCompleted = DataStorage.Requests.Any(r => r.Status == "Выполнена");
 
             if (!hasCompleted)

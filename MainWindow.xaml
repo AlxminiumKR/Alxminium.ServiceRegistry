@@ -7,6 +7,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Icon="Models/EmblemSR.png">
+
     <Window.Resources>
         <Style x:Key="WrapTextColumnStyle" TargetType="TextBlock">
             <Setter Property="TextWrapping" Value="Wrap"/>
@@ -27,6 +28,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="HelpCardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Width" Value="350"/>
+            <Setter Property="Height" Value="220"/>
+            <Setter Property="UniformCornerRadius" Value="15"/>
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -38,14 +48,14 @@
                                Style="{StaticResource MaterialDesignBody2TextBlock}" TextWrapping="Wrap" Margin="0,0,0,20" Foreground="#757575"/>
 
                     <TextBox x:Name="TxtFeedbackMessage" 
-                               Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                               AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                               Height="120" materialDesign:HintAssist.Hint="Ваше сообщение..." 
-                               materialDesign:TextFieldAssist.HasClearButton="True"/>
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             Height="120" materialDesign:HintAssist.Hint="Ваше сообщение..." 
+                             materialDesign:TextFieldAssist.HasClearButton="True"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
                         <Button Content="ОТМЕНА" Click="BtnCloseFeedback_Click" 
-                               Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
+                                Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
                         <Grid>
                             <Button x:Name="BtnSendFeedback" Content="ОТПРАВИТЬ" 
                                     Click="BtnSendFeedback_Click" 
@@ -95,10 +105,10 @@
                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                             Style="{StaticResource MaterialDesignNavigationRailTabControl}">
 
-                    <TabItem Cursor="">
+                    <TabItem>
                         <TabItem.Header>
                             <StackPanel Width="72">
-                                <materialDesign:PackIcon Kind="PlusCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                <materialDesign:PackIcon Kind="PlusCircle" Foreground="White" HorizontalAlignment="Center" Width="24" Height="24"/>
                                 <TextBlock Text="РЕГИСТРАЦИЯ" FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </TabItem.Header>
@@ -131,8 +141,8 @@
                     <TabItem x:Name="TabArchive">
                         <TabItem.Header>
                             <StackPanel Width="72">
-                                <materialDesign:PackIcon Kind="FileTable" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                <TextBlock Text="АРХИВ" FontSize="10" HorizontalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="FileTable" Foreground="White" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                <TextBlock Text="АРХИВ" Foreground="White" FontSize="10" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
                         <Grid Margin="20">
@@ -147,9 +157,9 @@
                                               Content="Показать выполненные" VerticalAlignment="Center" Margin="0,0,24,0"/>
                                     <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Bottom" Margin="0,0,4,8" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                                     <TextBox x:Name="TxtSearch" materialDesign:HintAssist.Hint="Поиск по объекту или услуге" 
-                                              Width="220" Margin="0,0,24,0" 
-                                              TextChanged="TxtSearch_TextChanged"
-                                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                                             Width="220" Margin="0,0,24,0" 
+                                             TextChanged="TxtSearch_TextChanged"
+                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
                                     <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="Дата С" Width="100" Margin="0,0,8,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
                                     <TextBlock Text="—" VerticalAlignment="Bottom" Margin="0,0,8,8"/>
                                     <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="Дата ПО" Width="100" Margin="0,0,24,0" Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
@@ -212,11 +222,11 @@
                         </Grid>
                     </TabItem>
 
-                    <TabItem x:Name="TabAdmin">
+                    <TabItem x:Name="TabAdmin" Visibility="Hidden" IsEnabled="False">
                         <TabItem.Header>
                             <StackPanel Width="72">
-                                <materialDesign:PackIcon Kind="Settings" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                <TextBlock Text="АДМИН" FontSize="10" HorizontalAlignment="Center"/>
+                                <materialDesign:PackIcon Foreground="White" Kind="Settings" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                <TextBlock Text="АДМИН" Foreground="White" FontSize="10" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
                         <UniformGrid Columns="2" Margin="10">
@@ -245,7 +255,7 @@
                                               Style="{StaticResource MaterialDesignDataGrid}"
                                               ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="105" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                            <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                             <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                             <DataGridTemplateColumn Header="Описание" Width="*" MinWidth="150">
                                                 <DataGridTemplateColumn.CellTemplate>
@@ -254,7 +264,7 @@
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
-                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:N2} ₽'}" Width="90"/>
+                                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:N2} ₽'}" Width="100"/>
                                             <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="80"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
@@ -262,6 +272,129 @@
                             </materialDesign:Card>
                         </UniformGrid>
                     </TabItem>
+
+                    <!-- Эта часть просто для того, чтобы опустить кнопку "Справка" в самый низ, так как я честно не хочу запарываться с тем, чтобы её опускать вниз, поэтому здесь костыли. -->
+                    <TabItem IsEnabled="False">
+                        <TabItem.Header>
+                            <Grid Height="50" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem IsEnabled="False">
+                        <TabItem.Header>
+                            <Grid Height="50" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem IsEnabled="False">
+                        <TabItem.Header>
+                            <Grid Height="50" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem IsEnabled="False">
+                        <TabItem.Header>
+                            <Grid Height="50" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem IsEnabled="False">
+                        <TabItem.Header>
+                            <Grid Height="50" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <!-- Эта часть просто для того, чтобы опустить кнопку "Справка" в самый низ, так как я честно не хочу запарываться с тем, чтобы её опускать вниз, поэтому здесь костыли. -->
+
+                    <TabItem x:Name="TabHelp">
+                        <TabItem.Header>
+                            <StackPanel Width="72">
+                                <materialDesign:PackIcon Foreground="#FFE082" Kind="HelpCircle" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                <TextBlock Text="СПРАВКА" Foreground="#FFE082" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <ScrollViewer>
+                            <StackPanel Margin="30">
+                                <TextBlock Text="РУКОВОДСТВО ПОЛЬЗОВАТЕЛЯ" Style="{StaticResource MaterialDesignHeadline4TextBlock}" Margin="10,0,0,20"/>
+
+                                <WrapPanel Orientation="Horizontal">
+                                    <materialDesign:Card Style="{StaticResource HelpCardStyle}">
+                                        <StackPanel>
+                                            <materialDesign:PackIcon Kind="Briefcase" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                            <TextBlock Text="Процесс работы" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,10,0,5"/>
+                                            <TextBlock Text="1. Выберите объект и услугу.&#x0a;2. Укажите объем работ.&#x0a;3. Опишите проблему/уточняющий комментарий &#x0a;4. Создайте заявку." 
+                                                       TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                                        </StackPanel>
+                                    </materialDesign:Card>
+
+                                    <materialDesign:Card Style="{StaticResource HelpCardStyle}">
+                                        <Grid Margin="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0">
+                                                <materialDesign:PackIcon Kind="FileExcel" Width="32" Height="32" Foreground="Green"/>
+                                                <TextBlock Text="Excel: Объекты" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,10,0,5"/>
+                                                <TextBlock TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody2TextBlock}">
+                                                <Run Text="Столбцы: name, address, responsible."/>
+                                                <LineBreak/>
+                                                <Run Text="ID указывать не нужно. Первая строка - заголовок. Система создаст ID автоматически."/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <Button Grid.Row="1" 
+                Style="{StaticResource MaterialDesignFlatButton}"
+                Click="BtnDownloadObjectsTemplate_Click"
+                HorizontalAlignment="Stretch"
+                Foreground="{DynamicResource PrimaryHueMidBrush}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Download" Margin="0,0,8,0" Width="18" Height="18"/>
+                                                    <TextBlock Text="СКАЧАТЬ ШАБЛОН"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </materialDesign:Card>
+
+                                    <materialDesign:Card Style="{StaticResource HelpCardStyle}">
+                                        <Grid Margin="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0">
+                                                <materialDesign:PackIcon Kind="ListBoxOutline" Width="32" Height="32" Foreground="Orange"/>
+                                                <TextBlock Text="Excel: Услуги" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,10,0,5"/>
+                                                <TextBlock TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody2TextBlock}">
+                                                <Run Text="Столбцы: work_name, work_type, description, unit, price, deadline_days."/>
+                                                <LineBreak/>
+                                                <Run Text="Цена и срок - числа. В ед. изм. укажите 'шт.', 'усл.' или 'м.'"/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <Button Grid.Row="1" 
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Click="BtnDownloadServicesTemplate_Click"
+                                                    HorizontalAlignment="Stretch"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Download" Margin="0,0,8,0" Width="18" Height="18"/>
+                                                    <TextBlock Text="СКАЧАТЬ ШАБЛОН"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </materialDesign:Card>
+
+                                    <materialDesign:Card Style="{StaticResource HelpCardStyle}">
+                                        <StackPanel>
+                                            <materialDesign:PackIcon Kind="StateMachine" Width="32" Height="32" Foreground="DodgerBlue"/>
+                                            <TextBlock Text="Управление статусами" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,10,0,5"/>
+                                            <TextBlock Text="Двойной клик по заявке задаёт ей статус 'Выполнено'. Клик правой кнопкой мыши открывает окно редактирования, где можно редактировать выбранную заявку или удалить её." 
+                                                       TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                                        </StackPanel>
+                                    </materialDesign:Card>
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
                 </TabControl>
             </DockPanel>
         </materialDesign:DialogHost>
@@ -269,8 +402,72 @@
         <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Margin="0,0,28,80" Background="#673AB7" BorderBrush="#673AB7"
-                Click="BtnOpenFeedback_Click">  
+                Click="BtnOpenFeedback_Click">
             <materialDesign:PackIcon Kind="MessageReplyText" Width="22" Height="22" />
         </Button>
+        <materialDesign:Snackbar x:Name="MainSnackbar" 
+                         MessageQueue="{materialDesign:MessageQueue}" 
+                         Background="#673AB7" 
+                         Foreground="White"
+                         VerticalAlignment="Bottom" 
+                         HorizontalAlignment="Center"
+                         Margin="0,0,0,24">
+            <materialDesign:Snackbar.ActionButtonStyle>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="12,0,12,0"/>
+                    <Setter Property="Margin" Value="16,1,8,0"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.7"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Snackbar.ActionButtonStyle>
+        </materialDesign:Snackbar>
+        <Grid x:Name="WelcomeOverlay" Background="#3f51b5" Opacity="1">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                <materialDesign:Card UniformCornerRadius="25" 
+                             materialDesign:ElevationAssist.Elevation="Dp12"
+                             Background="White"
+                             Width="380"
+                             Margin="0,0,0,40">
+
+                    <Grid Width="300" Height="300" HorizontalAlignment="Center">
+                        <Image Source="/Models/EmblemSR.png" 
+                       Stretch="Uniform"
+                       Margin="20"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.Effect>
+                                <DropShadowEffect BlurRadius="15" Direction="270" Opacity="0.1" ShadowDepth="3"/>
+                            </Image.Effect>
+                        </Image>
+                    </Grid>
+                </materialDesign:Card>
+
+                <TextBlock Text="ДОБРО ПОЖАЛОВАТЬ" 
+                   Style="{StaticResource MaterialDesignHeadline3TextBlock}" 
+                   Foreground="White"
+                   FontWeight="Light"
+                   HorizontalAlignment="Center"/>
+
+                <TextBlock x:Name="TxtWelcomeUser" Text="Загрузка профиля..." 
+                   HorizontalAlignment="Center" 
+                   Margin="0,15,0,0"
+                   Foreground="#E0E0E0"
+                   Style="{StaticResource MaterialDesignBody1TextBlock}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
