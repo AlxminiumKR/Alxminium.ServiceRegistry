@@ -209,25 +209,36 @@ namespace Alxminium.ServiceRegistry
         private void UpdateRequestDetailsInDb(WorkRequest req)
         {
             var db = new DatabaseManager();
-            try
+            using (var conn = db.GetConnection())
             {
-                using (var conn = db.GetConnection())
-                {
-                    conn.Open();
-                    string sql = "UPDATE requests SET volume = @vol, description = @desc WHERE id = @id";
+                conn.Open();
+                string sql = @"UPDATE requests 
+                       SET object_id = @objId, 
+                           object_name = @objName, 
+                           work_name = @wName, 
+                           work_type = @wType, 
+                           unit = @unit, 
+                           price = @price, 
+                           volume = @vol, 
+                           total_cost = @total, 
+                           description = @desc 
+                       WHERE id = @id";
 
-                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@vol", req.Volume);
-                        cmd.Parameters.AddWithValue("@desc", req.Description ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@id", req.Id);
-                        cmd.ExecuteNonQuery();
-                    }
+                using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@objId", req.ObjectId);
+                    cmd.Parameters.AddWithValue("@objName", req.ObjectName);
+                    cmd.Parameters.AddWithValue("@wName", req.WorkName);
+                    cmd.Parameters.AddWithValue("@wType", req.WorkType);
+                    cmd.Parameters.AddWithValue("@unit", req.Unit);
+                    cmd.Parameters.AddWithValue("@price", req.Price);
+                    cmd.Parameters.AddWithValue("@vol", req.Volume);
+                    cmd.Parameters.AddWithValue("@total", req.TotalCost);
+                    cmd.Parameters.AddWithValue("@desc", req.Description);
+                    cmd.Parameters.AddWithValue("@id", req.Id);
+
+                    cmd.ExecuteNonQuery();
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка обновления данных в БД: " + ex.Message);
             }
         }
 
@@ -241,6 +252,9 @@ namespace Alxminium.ServiceRegistry
                                     "Доступ ограничен", MessageBoxButton.OK, MessageBoxImage.Stop);
                     return;
                 }
+
+                ComboObjects.SelectedItem = DataStorage.Objects.FirstOrDefault(o => o.Id == selectedRequest.ObjectId);
+                ComboServices.SelectedItem = DataStorage.ServiceTasks.FirstOrDefault(s => s.WorkName == selectedRequest.WorkName);
 
                 TxtVolume.Text = selectedRequest.Volume.ToString();
                 TxtDescription.Text = selectedRequest.Description;
@@ -547,7 +561,9 @@ namespace Alxminium.ServiceRegistry
                 );
             }
 
+            GridRequests.ItemsSource = null;
             GridRequests.ItemsSource = filtered.ToList();
+
             UpdateStatistics();
         }
 
@@ -926,68 +942,80 @@ namespace Alxminium.ServiceRegistry
             var selectedObject = ComboObjects.SelectedItem as ServiceObject;
             var selectedTask = ComboServices.SelectedItem as ServiceTask;
 
-            if (BtnCreateRequest.Tag is WorkRequest editingReq)
+            bool isVolumeValid = double.TryParse(TxtVolume.Text, out var volVal);
+            string description = TxtDescription.Text.Trim();
+
+            if (selectedObject == null || selectedTask == null || !isVolumeValid || string.IsNullOrEmpty(description))
             {
-                editingReq.Volume = double.TryParse(TxtVolume.Text, out var vEdit) ? vEdit : 0;
-                editingReq.Description = TxtDescription.Text;
-
-                UpdateRequestDetailsInDb(editingReq);
-
-                BtnCreateRequest.Content = "Создать заявку";
-                BtnCreateRequest.Tag = null;
-
-                RefreshRequestsGrid();
-                MessageBox.Show("Заявка обновлена!");
+                MessageBox.Show("Пожалуйста, заполните все поля: Объект, Услуга, Объем и Описание!",
+                                "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            if (selectedObject == null || selectedTask == null ||
-                string.IsNullOrEmpty(TxtVolume.Text) || string.IsNullOrEmpty(TxtDescription.Text))
-            {
-                MessageBox.Show("Заполните все поля, включая описание!");
-                return;
-            }
-
-            var vol = double.TryParse(TxtVolume.Text, out var volVal) ? volVal : 0;
-
-            var newRequest = new WorkRequest
-            {
-                Id = 0,
-                Author = CurrentUser.Login,
-                Section = "Участок №1",
-                ObjectId = selectedObject.Id,
-                ObjectName = selectedObject.Name,
-                WorkName = selectedTask.WorkName,
-                WorkType = selectedTask.WorkType,
-                DeadlineDays = selectedTask.DeadlineDays,
-                Unit = selectedTask.Unit,
-                Price = selectedTask.Price,
-                Volume = vol,
-                TotalCost = selectedTask.Price * (decimal)vol,
-                Status = "В работе",
-                Description = TxtDescription.Text,
-                CreatedAt = DateTime.Now
-            };
 
             try
             {
-                DataStorage.Requests.Add(newRequest);
-                SaveRequestToDb(newRequest);
+                if (BtnCreateRequest.Tag is WorkRequest editingReq)
+                {
+                    editingReq.ObjectId = selectedObject.Id;
+                    editingReq.ObjectName = selectedObject.Name;
+                    editingReq.WorkName = selectedTask.WorkName;
+                    editingReq.WorkType = selectedTask.WorkType;
+                    editingReq.Unit = selectedTask.Unit;
+                    editingReq.Price = selectedTask.Price;
+                    editingReq.Volume = volVal;
+                    editingReq.Description = description;
+                    editingReq.TotalCost = editingReq.Price * (decimal)volVal;
+
+                    UpdateRequestDetailsInDb(editingReq);
+
+                    MessageBox.Show($"Заявка №{editingReq.Id} успешно обновлена!");
+
+                    BtnCreateRequest.Content = "Создать заявку";
+                    BtnCreateRequest.Tag = null;
+                }
+                else
+                {
+                    var newRequest = new WorkRequest
+                    {
+                        Id = 0,
+                        Author = CurrentUser.Login,
+                        Section = "Участок №1",
+                        ObjectId = selectedObject.Id,
+                        ObjectName = selectedObject.Name,
+                        WorkName = selectedTask.WorkName,
+                        WorkType = selectedTask.WorkType,
+                        DeadlineDays = selectedTask.DeadlineDays,
+                        Unit = selectedTask.Unit,
+                        Price = selectedTask.Price,
+                        Volume = volVal,
+                        TotalCost = selectedTask.Price * (decimal)volVal,
+                        Status = "В работе",
+                        Description = description,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    DataStorage.Requests.Add(newRequest);
+                    SaveRequestToDb(newRequest);
+
+                    MessageBox.Show("Заявка успешно создана!");
+                }
+
+                ClearRequestInputs();
                 UpdateStatistics();
-
-                MessageBox.Show("Заявка успешно создана и данные законсервированы в MySQL!");
-
-                TxtVolume.Clear();
-                TxtDescription.Clear();
-                ComboObjects.SelectedIndex = -1;
-                ComboServices.SelectedIndex = -1;
-
-                RefreshRequestsGrid();
+                LoadRequestsFromDb();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Произошла ошибка: " + ex.Message);
+                MessageBox.Show("Произошла ошибка: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void ClearRequestInputs()
+        {
+            TxtVolume.Clear();
+            TxtDescription.Clear();
+            ComboObjects.SelectedIndex = -1;
+            ComboServices.SelectedIndex = -1;
         }
 
         private void DeleteObjectFromDb(int objectId)

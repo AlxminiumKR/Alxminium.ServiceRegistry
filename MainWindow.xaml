@@ -237,6 +237,17 @@
                                     <DataGrid x:Name="GridAllObjects" AutoGenerateColumns="False" IsReadOnly="True" 
                                               Style="{StaticResource MaterialDesignDataGrid}"
                                               ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
+
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Удалить объект" Click="BtnDeleteObject_Click">
+                                                    <MenuItem.Icon>
+                                                        <materialDesign:PackIcon Kind="DeleteForever" Foreground="Red"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
@@ -254,6 +265,17 @@
                                     <DataGrid x:Name="GridAllServices" AutoGenerateColumns="False" IsReadOnly="True" 
                                               Style="{StaticResource MaterialDesignDataGrid}"
                                               ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
+
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Удалить услугу" Click="BtnDeleteService_Click">
+                                                    <MenuItem.Icon>
+                                                        <materialDesign:PackIcon Kind="DeleteOutline" Foreground="Red"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Категория" Binding="{Binding WorkType}" Width="100" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                             <DataGridTextColumn Header="Услуга" Binding="{Binding WorkName}" Width="120" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
