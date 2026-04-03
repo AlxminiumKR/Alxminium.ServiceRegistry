@@ -335,15 +335,15 @@
                                                 <TextBlock TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody2TextBlock}">
                                                 <Run Text="Столбцы: name, address, responsible."/>
                                                 <LineBreak/>
-                                                <Run Text="ID указывать не нужно. Первая строка - заголовок. Система создаст ID автоматически."/>
+                                                <Run Text="ID указывать не нужно. Первая строка - заголовок."/>
                                                 </TextBlock>
                                             </StackPanel>
 
                                             <Button Grid.Row="1" 
-                Style="{StaticResource MaterialDesignFlatButton}"
-                Click="BtnDownloadObjectsTemplate_Click"
-                HorizontalAlignment="Stretch"
-                Foreground="{DynamicResource PrimaryHueMidBrush}">
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Click="BtnDownloadObjectsTemplate_Click"
+                                                    HorizontalAlignment="Stretch"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <materialDesign:PackIcon Kind="Download" Margin="0,0,8,0" Width="18" Height="18"/>
                                                     <TextBlock Text="СКАЧАТЬ ШАБЛОН"/>
@@ -443,12 +443,12 @@
                              Margin="0,0,0,40">
 
                     <Grid Width="300" Height="300" HorizontalAlignment="Center">
-                        <Image Source="/Models/EmblemSR.png" 
-                       Stretch="Uniform"
-                       Margin="20"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image Source="Models/logo2.png" 
+                                       Stretch="Uniform"
+                                       Margin="20"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       RenderOptions.BitmapScalingMode="HighQuality">
                             <Image.Effect>
                                 <DropShadowEffect BlurRadius="15" Direction="270" Opacity="0.1" ShadowDepth="3"/>
                             </Image.Effect>
