@@ -14,6 +14,8 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace Alxminium.ServiceRegistry
 {
@@ -46,7 +48,7 @@ namespace Alxminium.ServiceRegistry
                 From = 1.0,
                 To = 0.0,
                 Duration = TimeSpan.FromSeconds(2),
-                BeginTime = TimeSpan.FromSeconds(2)
+                BeginTime = TimeSpan.FromSeconds(1)
             };
 
             fadeAnimation.Completed += (s, e) => {
@@ -67,13 +69,34 @@ namespace Alxminium.ServiceRegistry
                     if (GridAllObjects != null) GridAllObjects.ContextMenu = null;
                     if (GridAllServices != null) GridAllServices.ContextMenu = null;
                 }
+
+                if (MenuDeleteRequest != null)
+                {
+                    MenuDeleteRequest.Visibility = Visibility.Collapsed;
+                }
+
+                if (SeparatorDelete != null)
+                {
+                    SeparatorDelete.Visibility = Visibility.Collapsed;
+                }
             }
+
             else
             {
                 if (TabAdmin != null)
                 {
                     TabAdmin.Visibility = Visibility.Visible;
                     TabAdmin.IsEnabled = true;
+                }
+
+                if (MenuDeleteRequest != null)
+                {
+                    MenuDeleteRequest.Visibility = Visibility.Visible;
+                }
+
+                if (SeparatorDelete != null)
+                {
+                    SeparatorDelete.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -544,27 +567,45 @@ namespace Alxminium.ServiceRegistry
 
         private void RefreshRequestsGrid()
         {
-            string searchText = TxtSearch.Text.Trim().ToLower();
-            var filtered = DataStorage.Requests.AsEnumerable();
+            string searchText = TxtSearch.Text?.Trim().ToLower() ?? "";
 
-            if (ChkShowCompleted.IsChecked != true)
+            var filteredList = DataStorage.Requests.Where(r => {
+                bool matchesStatus = (ChkShowCompleted.IsChecked == true) || (r.Status == "В работе");
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchText) ||
+                                     (r.ObjectName?.ToLower().Contains(searchText) == true) ||
+                                     (r.WorkName?.ToLower().Contains(searchText) == true) ||
+                                     (r.Description?.ToLower().Contains(searchText) == true);
+                return matchesStatus && matchesSearch;
+            }).ToList();
+
+            GridRequests.ItemsSource = filteredList;
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(GridRequests.ItemsSource);
+            if (view != null)
             {
-                filtered = filtered.Where(r => r.Status == "В работе");
+                using (view.DeferRefresh())
+                {
+                    view.GroupDescriptions.Clear();
+                    view.GroupDescriptions.Add(new PropertyGroupDescription("WorkType"));
+                    view.SortDescriptions.Clear();
+                    view.SortDescriptions.Add(new SortDescription("CreatedAt", ListSortDirection.Descending));
+                }
             }
-
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                filtered = filtered.Where(r =>
-                    (r.ObjectName != null && r.ObjectName.ToLower().Contains(searchText)) ||
-                    (r.WorkName != null && r.WorkName.ToLower().Contains(searchText)) ||
-                    (r.Description != null && r.Description.ToLower().Contains(searchText))
-                );
-            }
-
-            GridRequests.ItemsSource = null;
-            GridRequests.ItemsSource = filtered.ToList();
 
             UpdateStatistics();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (GridRequests.ItemsSource != null && GridRequests.Columns.Count > 0)
+                {
+                    var lastCol = GridRequests.Columns.Last();
+                    var originalWidth = lastCol.Width;
+                    lastCol.Width = 0;
+                    lastCol.Width = originalWidth;
+
+                    GridRequests.UpdateLayout();
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void TxtSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)

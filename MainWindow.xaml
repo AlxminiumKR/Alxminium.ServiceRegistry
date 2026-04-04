@@ -173,33 +173,68 @@
                             </materialDesign:Card>
 
                             <materialDesign:Card Grid.Row="1" materialDesign:ElevationAssist.Elevation="Dp2">
-                                <DataGrid x:Name="GridRequests" MouseDoubleClick="GridRequests_MouseDoubleClick" 
-                                          AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}" 
-                                          CanUserAddRows="False" SelectionMode="Single"
+                                <DataGrid x:Name="GridRequests" 
+                                          MouseDoubleClick="GridRequests_MouseDoubleClick" 
+                                          AutoGenerateColumns="False" 
+                                          IsReadOnly="True" 
+                                          ItemsSource="{Binding}" 
+                                          CanUserAddRows="False" 
+                                          SelectionMode="Single"
                                           Style="{StaticResource MaterialDesignDataGrid}"
-                                          ColumnHeaderStyle="{StaticResource WrapHeaderStyle}">
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Редактировать" Click="MenuEditRequest_Click">
-                                                <MenuItem.Icon>
-                                                    <materialDesign:PackIcon Kind="Pencil" />
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                            <Separator />
-                                            <MenuItem Header="Удалить заявку" Click="BtnDeleteRequest_Click" Foreground="#E53935">
-                                                <MenuItem.Icon>
-                                                    <materialDesign:PackIcon Kind="Delete" Foreground="#E53935" />
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
+                                          ColumnHeaderStyle="{StaticResource WrapHeaderStyle}"
+                                          EnableRowVirtualization="False"
+                                          ScrollViewer.CanContentScroll="False"
+                                          HorizontalScrollBarVisibility="Disabled">
+
+                                    <DataGrid.GroupStyle>
+                                        <GroupStyle>
+                                            <GroupStyle.ContainerStyle>
+                                                <Style TargetType="{x:Type GroupItem}">
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                                <Expander IsExpanded="True" 
+                                      Background="#F1F8E9" 
+                                      BorderBrush="#DCEDC8" 
+                                      BorderThickness="0,0,0,1" 
+                                      Margin="0,0,0,10"
+                                      HorizontalAlignment="Stretch"
+                                      HorizontalContentAlignment="Stretch">
+                                                                    <Expander.Header>
+                                                                        <Grid HorizontalAlignment="Stretch" 
+                                          Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}, Path=ActualWidth, ConverterParameter=40}">
+                                                                            <StackPanel Orientation="Horizontal" Height="40">
+                                                                                <materialDesign:PackIcon Kind="FolderOpen" Foreground="#558B2F" 
+                                                                     VerticalAlignment="Center" Margin="10,0,5,0"
+                                                                     Width="20" Height="20"/>
+
+                                                                                <TextBlock Text="{Binding Name}" 
+                                                       FontWeight="Bold" Foreground="#33691E" 
+                                                       FontSize="14" VerticalAlignment="Center"/>
+
+                                                                                <TextBlock Text="{Binding ItemCount, StringFormat='  ({0} заявок)'}" 
+                                                       Foreground="#757575" FontSize="12" VerticalAlignment="Center"/>
+                                                                            </StackPanel>
+                                                                        </Grid>
+                                                                    </Expander.Header>
+                                                                    <ItemsPresenter />
+                                                                </Expander>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </GroupStyle.ContainerStyle>
+                                        </GroupStyle>
+                                    </DataGrid.GroupStyle>
+
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
                                         <DataGridTextColumn Header="Объект" Binding="{Binding ObjectName}" Width="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
-                                        <DataGridTextColumn Header="Работа" Binding="{Binding WorkName}" Width="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
-                                        <DataGridTextColumn Header="Срок (дн)" Binding="{Binding DeadlineDays}" Width="80"/>
-                                        <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="80"/>
-                                        <DataGridTextColumn Header="Сумма" Binding="{Binding TotalCost, StringFormat='{}{0:N2} ₽'}" Width="100"/>
+                                        <DataGridTextColumn Header="Работа" Binding="{Binding WorkName}" Width="180" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                        <DataGridTextColumn Header="Срок" Binding="{Binding DeadlineDays}" Width="60"/>
+                                        <DataGridTextColumn Header="Объем" Binding="{Binding Volume}" Width="70"/>
+                                        <DataGridTextColumn Header="Сумма" Binding="{Binding TotalCost, StringFormat='{}{0:N0} ₽'}" Width="100"/>
                                         <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="110">
                                             <DataGridTextColumn.ElementStyle>
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource WrapTextColumnStyle}">
@@ -215,8 +250,27 @@
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
-                                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*" MinWidth="150" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
+                                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="Auto" MinWidth="350" ElementStyle="{StaticResource WrapTextColumnStyle}"/>
                                     </DataGrid.Columns>
+
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Редактировать" Click="MenuEditRequest_Click">
+                                                <MenuItem.Icon>
+                                                    <materialDesign:PackIcon Kind="Edit" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <Separator x:Name="SeparatorDelete" />
+                                            <MenuItem x:Name="MenuDeleteRequest" 
+                      Header="Удалить заявку" 
+                      Click="BtnDeleteRequest_Click" 
+                      Foreground="#E53935">
+                                                <MenuItem.Icon>
+                                                    <materialDesign:PackIcon Kind="Delete" Foreground="#E53935" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
                                 </DataGrid>
                             </materialDesign:Card>
                         </Grid>
@@ -488,7 +542,7 @@
                    HorizontalAlignment="Center" 
                    Margin="0,15,0,0"
                    Foreground="#E0E0E0"
-                   Style="{StaticResource MaterialDesignBody1TextBlock}"/>
+                   Style="{StaticResource MaterialDesignBody1TextBlock}"/> 
             </StackPanel>
         </Grid>
     </Grid>
